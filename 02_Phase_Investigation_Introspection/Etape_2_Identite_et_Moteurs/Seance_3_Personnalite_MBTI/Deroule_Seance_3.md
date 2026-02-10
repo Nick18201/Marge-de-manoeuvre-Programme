@@ -5,9 +5,11 @@
 
 ## Contenu de la Séance
 
-### 1. Retour sur le 360° Bienveillant (10 min)
-*   Analyse des retours de l'entourage.
-*   Corrélation avec l'image de soi.
+### 1. Retour sur le Travail Inter-Session (20 min)
+*   **Image du Travail :** Rapide analyse des mots choisis (croyances limitantes vs vision souhaitée).
+*   **Interview Passion :** Qu'est-ce qui a marqué les esprits ? (Énergie, sens, déclics).
+*   **360° Bienveillant :** Analyse des retours de l'entourage (Surprises / Confirmations).
+*   *Transition :* Ce que les autres voient de nous vs ce que le test de personnalité va révéler.
 
 ### 2. Restitution MBTI et Profil (40 min)
 *   **Validation du profil :** Le bénéficiaire se reconnaît-il ? (Lecture du rapport en amont).

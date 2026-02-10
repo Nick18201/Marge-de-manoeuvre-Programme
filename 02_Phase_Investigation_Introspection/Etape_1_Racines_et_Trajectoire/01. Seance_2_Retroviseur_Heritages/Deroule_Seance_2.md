@@ -22,5 +22,8 @@
 *   Arbre de Vie (si besoin de restaurer l'estime de soi après un trauma).
 
 ## Préparation de la Séance 3
-*   Passation du test MBTI en ligne.
-*   Questionnaire "360° bienveillant" à envoyer à 3 proches.
+*   **Test MBTI :** Passation en ligne (lien à fournir) et lecture du rapport.
+*   **360° Bienveillant :** Questionnaire à envoyer à 4-6 proches (cf. modèle).
+*   **Image du Travail :** Introspection sur les 5 mots associés au travail (actuel vs futur).
+*   **Interview "Passion" :** Échange de 20min avec un professionnel épanoui (exercice clé pour l'état d'esprit).
+

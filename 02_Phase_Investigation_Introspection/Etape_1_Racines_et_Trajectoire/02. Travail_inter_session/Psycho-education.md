@@ -1,0 +1,1 @@
+psycho éducation sur la question de la personnalité et de son rôle dans le bien être au travail (idée d’adéquation métiers / secteurs / personnes) + expliquer les risques à être dans un milieu inadapté pour notre profil = suradaptation / burn-out / sentiment d’échec ou inefficacité
