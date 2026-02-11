@@ -93,7 +93,7 @@ Ce document présente la structure détaillée et le contenu pédagogique du pro
     *   **Pré-Plan d'Action :** Commencer à remplir la trame du plan d'action (grandes étapes, échéances).
     *   **Synthèse :** Relire l'ensemble des notes et documents pour préparer le bilan final.
 
-### Étape 4 : Posture & Outils (Contenu en Autonomie)
+### Étape 4 : Posture & Outils (Contenu en Autonomie) nombre de séances à définir
 *   Modules complémentaires pour outiller le bénéficiaire :
     *   **Career Hacking**
     *   **Job Crafting**

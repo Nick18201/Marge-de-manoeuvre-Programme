@@ -1,6 +1,6 @@
 # Offres et Tarifs - Programme MDM
 
-## Formule "L'Essentiel" (8h)
+## Formule (8h)
 *   **Format :** 8 séances d'1h (ou 7 séances d'1h + 1h de suivi à 6 mois).
 *   **Rythme idéal :** 1 séance tous les 10 à 15 jours.
 
