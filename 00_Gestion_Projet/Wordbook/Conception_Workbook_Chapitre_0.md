@@ -33,43 +33,42 @@
     2.  **Authenticité** : "Pas de masque. C'est votre vérité qui compte."
     3.  **Action** : "La clarté vient du mouvement, pas seulement de la pensée."
 
-### Page 4 : Mon Intention (Interactive)
+### Page 4 : Mon Intention (Formulaire à Remplir)
 *   **Titre** : "Mon Engagement Envers Moi-même"
-*   **Contenu généré** :
-    *   "Moi, `[Prénom]`, décide aujourd'hui d'investir `[Heures par semaine]` heures par semaine pour mon avenir."
-    *   "Mon objectif principal est de : `[Objectif Principal saisi]`."
-    *   "Pour réussir, je m'autorise à : `[Autorisation saisie]` (ex: être imparfait, demander de l'aide)."
-*   **Signature** : Espace pour signer (ou signature numérique générée).
+*   **Champs Interactifs** :
+    *   "Moi, `[Champ Texte : Prénom]`..."
+    *   "...décide aujourd'hui d'investir `[Champ Texte : Heures]` heures par semaine pour mon avenir."
+    *   "Mon objectif principal est de : `[Champ Texte Multi-lignes : Objectif]`."
+    *   "Pour réussir, je m'autorise à : `[Champ Texte Multi-lignes : Autorisation]`."
+*   **Validation** : Case à cocher "Je m'engage solennellement".
+*   **Signature** : Champ libre pour la date et le lieu.
 
 ---
 
-## 3. Formulaire de Collecte (Source de données)
+## 3. Données à Collecter (Champs PDF)
 
-Le bénéficiaire reçoit un lien Tally/Typeform "Initialisez votre Livre".
+Ce document est un **PDF Interactif** envoyé au bénéficiaire.
 
-**Question 1 : Identité**
-*   "Comment souhaitez-vous être nommé(e) dans ce livre ?" (Prénom / Surnom)
+**Zone 1 : Identité**
+*   Champ : `nom_complet`
 
-**Question 2 : La Motivation (Objectif Boussole V0)**
-*   "Si nous avons une baguette magique, quelle serait votre situation idéale à la fin de ce bilan, dans 3 mois ?" (Texte libre)
-*   *Usage : Sera synthétisé pour la Page 4.*
+**Zone 2 : La Boussole**
+*   Champ : `objectif_3_mois` (Question : "Quelle serait votre situation idéale à la fin de ce bilan ?")
 
-**Question 3 : L'Engagement**
-*   "Combien de temps pouvez-vous *réalistement* consacrer à votre travail personnel chaque semaine ?" (Choix unique : 1h, 2h, 3h+)
-
-**Question 4 : L'Autorisation**
-*   "Quelle permission avez-vous besoin de vous donner pour vivre ce processus pleinement ?"
-    *   Exemples : "Me tromper", "Prendre mon temps", "Changer d'avis".
-*   *Usage : Page 4.*
+**Zone 3 : Le Pacte**
+*   Champ : `engagement_hebdo` (Nombre d'heures)
+*   Champ : `permission_personnelle` (Quelle autorisation vous donnez-vous ?)
 
 ---
 
-## 4. Instructions Techniques (Automation)
+## 4. Instructions Techniques (Automation Google Workspace)
 
-1.  **Trigger** : Nouveau formulaire soumis (Tally).
-2.  **Action 1** : Formater la date actuelle (ex: "Janvier 2026").
-3.  **Action 2 (Génération PDF)** :
-    *   Remplir le template `Workbook_Cover.docx` avec `[Nom]`.
-    *   Remplir le template `Workbook_Chap0.docx` avec les réponses.
-4.  **Action 3 (Merge)** : Fusionner les 2 fichiers en `[Nom]_Livre_Chap0.pdf`.
-5.  **Action 4 (Envoi)** : Email avec pièce jointe + Sauvegarde Drive.
+1.  **Envoi** : Le bénéficiaire reçoit le `Workbook_Chap0_Interactive.pdf` par email.
+2.  **Remplissage** : Le bénéficiaire remplit le PDF sur son poste.
+3.  **Retour** :
+    *   Option A : Upload via Google Form.
+    *   Option B : Envoi à `intersession@margedemanoeuvre...`.
+4.  **Traitement (Google Workspace)** :
+    *   Trigger : Réception du fichier (Drive ou Gmail).
+    *   App Script : Extraction des données du formulaire PDF (parsing des champs).
+    *   Stockage : Mise à jour de la fiche bénéficiaire (Sheet/Doc).
