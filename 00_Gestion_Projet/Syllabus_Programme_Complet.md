@@ -16,6 +16,7 @@ Ce document présente la structure détaillée et le contenu pédagogique du pro
     *   **L'Objectif Boussole :** Hiérarchisation pour identifier l'objectif prioritaire qui guidera les choix.
     *   **Transformation des Obstacles :** Reformulation des peurs et blocages en questions ouvertes et solubles.
     *   **Plan d'Action Macro :** Esquisse des grandes étapes à venir.
+    *   **Initialisation du Livret de Compétences :** Présentation du concept et ouverture de la section "Objectif Boussole" (P4 - Potentiel).
 *   **🎒 Travail Inter-Session (Pour S2) :**
     *   **Analyse du Parcours :** Compléter la chronologie des formations et expériences pro (motivations, compétences, j'aime/j'aime pas).
     *   **Enquête Familiale :** Répondre au questionnaire "Héritage" sur le métier des parents/grands-parents et leur relation au travail.
@@ -31,7 +32,7 @@ Ce document présente la structure détaillée et le contenu pédagogique du pro
 *   **Objectif :** Comprendre l'origine du bénéficiaire pour éclairer sa situation actuelle. Identifier les influences conscientes et inconscientes (familiales, sociales) et analyser le parcours professionnel.
 *   **Contenu Clé :**
     *   **Flash-back "Héritage" :** Analyse des modèles parentaux et de l'image du travail transmise (Génogramme simplifié/3FVS).
-    *   **Analyse du Parcours (Ligne de Vie) :** Identification des compétences transférables, des "soft skills" et des moments de crise ou de rupture.
+    *   **Analyse du Parcours (Ligne de Vie) :** Identification des compétences transférables, des "soft skills" et des moments de crise ou de rupture -> *Alimentation de la section "Parcours" (P2) du Livret.*
     *   **Figures Clés :** Identification des Mentors (inspirations) et des Anti-modèles (repoussoirs).
 *   **🎒 Travail Inter-Session (Pour S3) :**
     *   **Test MBTI :** Passation du test de personnalité en ligne.
@@ -46,8 +47,8 @@ Ce document présente la structure détaillée et le contenu pédagogique du pro
 *   **Objectif :** Comprendre le mode de fonctionnement naturel du bénéficiaire. Identifier ses zones de "flow" (talents naturels) et ses zones d'épuisement pour aligner le projet futur.
 *   **Contenu Clé :**
     *   **Retour Inter-session :** Analyse de l'image du travail et du 360° Bienveillant.
-    *   **Restitution MBTI :** Validation du profil, identification des zones de confort et d'effort.
-    *   **Identification des Moteurs :** Ce qui pousse à l'action (Compétition, Harmonie, Expertise, etc.).
+    *   **Restitution MBTI :** Validation du profil, identification des zones de confort et d'effort -> *Alimentation de la section "Profil" (P1) du Livret.*
+    *   **Identification des Moteurs :** Ce qui pousse à l'action (Compétition, Harmonie, Expertise, etc.) -> *Alimentation de la section "Profil/ADN" (P1).*
 *   **🎒 Travail Inter-Session (Pour S4) :**
     *   **Valeurs :** Exercice de tri des valeurs (jeu de cartes ou liste à hiérarchiser).
     *   **Intérêts Professionnels :** Passation du test Hexa3D (ou équivalent RIASEC).
@@ -58,7 +59,7 @@ Ce document présente la structure détaillée et le contenu pédagogique du pro
 *   **Contenu Clé :**
     *   **Money Script (KMSI) :** Identification du profil dominant (Évitement, Adoration, Statut, Vigilance).
     *   **Biographie Financière :** Exploration des racines émotionnelles liées à l'argent (souvenirs d'enfance).
-    *   **Dialogue avec l'Argent :** Exercice narratif pour dé-fusionner et assainir la relation à l'argent.
+    *   **Dialogue avec l'Argent :** Exercice narratif pour dé-fusionner et assainir la relation à l'argent -> *Identification des freins pour la section "Potentiel" (P4).*
     *   **Mindset de Surplus & Archétypes Sacrés :** Transition vers une psychologie d'abondance et identification des atouts naturels.
 *   **🎒 Travail Inter-Session (Pour S5) :**
     *   **Générosité Stratégique :** Poser une action concrète (don, aide, conseil) pour activer le mindset d'abondance.
@@ -85,7 +86,7 @@ Ce document présente la structure détaillée et le contenu pédagogique du pro
 *   **Durée :** 1h
 *   **Objectif :** Confronter les pistes explorées à la réalité (convergence), valider un scénario principal (Plan A) et assurer sa faisabilité.
 *   **Contenu Clé :**
-    *   **Débriefing des Enquêtes :** Analyse des retours terrain (écart fantasme/réalité).
+    *   **Débriefing des Enquêtes :** Analyse des retours terrain (écart fantasme/réalité) -> *Validation des compétences marchés pour la section "Preuves" (P3).*
     *   **Matrice de Faisabilité :** Analyse des contraintes froides (Finances, Temps, Systémie familiale).
     *   **Choix de la Piste :** Validation du Plan A et identification de Plan(s) B.
 *   **🎒 Travail Inter-Session (Pour S7) :**
@@ -107,6 +108,7 @@ Ce document présente la structure détaillée et le contenu pédagogique du pro
 *   **Objectif :** Formaliser le bilan de l'accompagnement et co-construire une feuille de route concrète et opérationnelle.
 *   **Contenu Clé :**
     *   **Co-construction de la Synthèse :** Récapitulatif des compétences, valeurs, et du projet retenu.
+    *   **Finalisation du Livret de Compétences :** Assemblage final des 4P (Profil, Parcours, Preuves, Potentiel). Le Livret devient l'outil de référence pour l'après.
     *   **Plan d'Action SMART :** Définition d'objectifs Spécifiques, Mesurables, Atteignables, Réalistes et Temporels.
     *   **Conseils Flash :** Recommandations rapides sur la posture et les outils de communication.
 *   **🎒 Travail pour les 6 mois à venir :**
