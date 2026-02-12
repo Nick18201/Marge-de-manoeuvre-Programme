@@ -58,6 +58,12 @@ if os.path.exists(PATH_AMATIC):
 elif os.path.exists(PATH_CAVEAT):
     pdfmetrics.registerFont(TTFont('Caveat-Regular', PATH_CAVEAT))
     FONT_HAND = 'Caveat-Regular'
+# --- 1.C ILLUSTRATIONS ---
+ILLUS_DIR = os.path.join(os.path.dirname(__file__), "..", "assets", "illustrations")
+PATH_ILLU_COVER = os.path.join(ILLUS_DIR, "01a_ILLU.png")
+PATH_GUILLEMETS = os.path.join(ILLUS_DIR, "guillemets.png")
+PATH_FLECHE = os.path.join(ILLUS_DIR, "fleche.png")
+PATH_STAMP = os.path.join(ILLUS_DIR, "stamp_rouge.png")
 
 # --- 2. GRAPHIC COMPONENTS ---
 
@@ -120,38 +126,55 @@ def create_cover_page(c):
     c.rect(0,0, width, height, fill=1, stroke=0)
     draw_dot_grid(c, width, height)
 
-    # 2. Composition Artistique
-    # A. Cercle Blanc (Zone de calme) - Décentré gauche
-    c.setFillColor(COLOR_WHITE)
-    c.circle(width*0.35, height*0.55, 160, fill=1, stroke=0)
+    # A. Illustration Principale (Cover)
+    if os.path.exists(PATH_ILLU_COVER):
+        # On centre l'image dans la partie haute/centrale
+        # Taille approximative : Largeur 2/3 de la page
+        img_width = width * 0.85
+        # Modification: On baisse l'image encore un peu pour faire de la place au header
+        # y=height*0.2
+        c.drawImage(PATH_ILLU_COVER, (width - img_width)/2, height * 0.20, width=img_width, height=height*0.5, mask='auto', preserveAspectRatio=True, anchor='c')
+    else:
+        # Fallback: Composition Artistique Géométrique
+        c.setFillColor(COLOR_WHITE)
+        c.circle(width*0.35, height*0.55, 160, fill=1, stroke=0)
 
-    # B. Carré Rouge (Ancrage) - Bas, très légère rotation
+    # 2b. Marque Header (Top Left)
+    # "Marge de Manoeuvre" en Rouge (Montserrat Bold)
     c.saveState()
-    c.translate(width*0.5, 4*cm)
-    c.rotate(2)
+    c.setFont(FONT_TITLE, 14) # Montserrat Bold si dispo
     c.setFillColor(COLOR_ACCENT_RED)
-    c.rect(-40, -40, 80, 80, fill=1, stroke=0)
+    # En haut à gauche, avec une marge
+    c.drawString(1.5*cm, height - 2*cm, "Marge de Manœuvre")
     c.restoreState()
 
-    # C. Feuilles Indigo (Traversantes)
-    draw_leaf(c, width*0.75, height*0.5, size=200, color=COLOR_ACCENT_BLUE, angle=45, alpha=0.2)
-    draw_leaf(c, width*0.7, height*0.45, size=90, color=COLOR_ACCENT_BLUE, angle=30, alpha=1.0)
-    # New extra leaves for "Branch" effect
-    draw_leaf(c, width*0.65, height*0.4, size=60, color=COLOR_ACCENT_BLUE, angle=15, alpha=0.8)
-
+    # 2c. Stamp Rouge
+    if os.path.exists(PATH_STAMP):
+        # On le place en bas à droite de la page
+        c.saveState()
+        c.translate(width - 5*cm, 4*cm) # Positionné en bas à droite
+        c.rotate(-15) # Légère rotation opposée pour le style
+        c.drawImage(PATH_STAMP, -2*cm, -2*cm, width=4*cm, height=4*cm, mask='auto', preserveAspectRatio=True, anchor='c')
+        c.restoreState()
 
     # 3. Titres
-    c.setFont(FONT_TITLE, 32)
+    # Fix: Font size reduced to fit width, or split lines.
+    # Let's try splitting lines and slightly smaller font.
+    c.setFont(FONT_TITLE, 42) 
     c.setFillColor(COLOR_ACCENT_BLUE)
-    c.drawRightString(width - 50, height - 100, "MON LIVRE DE TRANSITION")
+    
+    # "MON LIVRE"
+    c.drawRightString(width - 40, height - 120, "MON LIVRE")
+    # "DE TRANSITION"
+    c.drawRightString(width - 40, height - 170, "DE TRANSITION")
     
     c.setFont(FONT_BODY, 14)
     c.setFillColor(COLOR_TEXT_MAIN)
-    c.drawRightString(width - 50, height - 130, "BILAN DE COMPÉTENCES & ALIGNEMENT")
+    c.drawRightString(width - 40, height - 210, "BILAN DE COMPÉTENCES & ALIGNEMENT") 
     
     c.setFont(FONT_TITLE, 18)
     c.setFillColor(COLOR_ACCENT_RED)
-    c.drawRightString(width - 50, height - 160, "CHAPITRE 0 : LE PRÉLUDE")
+    c.drawRightString(width - 40, height - 240, "CHAPITRE 0 : LE PRÉLUDE")
     
     c.showPage()
 
@@ -198,7 +221,10 @@ def create_summary_page(c):
     
     for page_num, title, desc in steps:
         # Arrow/Bullet
-        c.drawString(3*cm, start_y, "->")
+        if os.path.exists(PATH_FLECHE):
+             c.drawImage(PATH_FLECHE, 2.8*cm, start_y - 0.1*cm, width=0.6*cm, height=0.6*cm, mask='auto', preserveAspectRatio=True)
+        else:
+             c.drawString(3*cm, start_y, "->")
         
         # Text
         c.setFont(FONT_TITLE, 12)
@@ -248,9 +274,13 @@ def create_editorial_page_card(c):
     c.drawString(text_x, text_top, "Le mot d'accueil")
     
     # Icon/Quote mark
-    c.setFont(FONT_HAND, 60)
-    c.setFillColor(COLOR_ACCENT_YELLOW)
-    c.drawRightString(text_x + card_width - 2*cm, text_top, ' " ')
+    if os.path.exists(PATH_GUILLEMETS):
+        # Image en haut à droite
+        c.drawImage(PATH_GUILLEMETS, text_x + card_width - 3*cm, text_top - 0.5*cm, width=2.5*cm, height=2.5*cm, mask='auto', preserveAspectRatio=True, anchor='ne')
+    else:
+        c.setFont(FONT_HAND, 60)
+        c.setFillColor(COLOR_ACCENT_YELLOW)
+        c.drawRightString(text_x + card_width - 2*cm, text_top, ' " ')
 
     # Body
     text_y = text_top - 2*cm
