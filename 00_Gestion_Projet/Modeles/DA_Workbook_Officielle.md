@@ -22,7 +22,7 @@ Toutes les couleurs sombres sont des déclinaisons de bleu profond ou de gris co
 
 ## 3. Typographie
 *   **Titres (Headings)** :
-    *   *Police* : **Montserrat** (Bold ou ExtraBold). Alternative : League Spartan.
+    *   *Police* : **Montserrat** (Black, Bold ou ExtraBold). Alternative : League Spartan.
     *   *Usage* : Grands titres (INTRODUCTION, FAIRE LE POINT).
     *   *Style* : Majuscules, Géométrique, Solide.
 *   **Corps de texte (Body)** :

@@ -1,0 +1,63 @@
+import os
+from reportlab.lib import colors
+from reportlab.lib.units import cm
+
+class PDFStyle:
+    # A. Palette de Couleurs
+    COLOR_BG_NUDE = colors.HexColor("#FFF0E6")       # Fond Papier
+    COLOR_ACCENT_BLUE = colors.HexColor("#3434C2")   # Indigo Électrique (Primary)
+    COLOR_ACCENT_RED = colors.HexColor("#FF4D4D")    # Rouge Vif (Secondary)
+    COLOR_ACCENT_YELLOW = colors.HexColor("#FFEB3B") # Jaune Soleil (Tertiary)
+    COLOR_WHITE = colors.HexColor("#FFFFFF")         # Blanc Pur
+    COLOR_TEXT_MAIN = colors.HexColor("#2A2A35")     # Gunmetal
+    COLOR_TEXT_SECONDARY = colors.HexColor("#808090") # Gris Souris
+    COLOR_SUCCESS = colors.HexColor("#2E7D32")       # Vert Succès
+
+    # B. Typography
+    FONT_TITLE = "Montserrat-Bold"
+    FONT_SUBTITLE = "Montserrat-SemiBold"
+    FONT_BODY = "Lato-Regular"
+    FONT_ITALIC = "Lato-Italic"
+    FONT_HAND = "Caveat-Regular"
+    FONT_BRANDING = "Montserrat-Black"
+    
+    # Fallback Fonts
+    FONT_TITLE_FALLBACK = "Helvetica-Bold"
+    FONT_BODY_FALLBACK = "Helvetica"
+    FONT_ITALIC_FALLBACK = "Helvetica-Oblique"
+    
+    # Dimensions
+    MARGIN_MAIN = 2.0 * cm
+    CARD_RADIUS = 10
+    
+    # Paths
+    # Assuming this file is in 00_Gestion_Projet/Scripts/workbook_generator/config.py
+    # Assets are in 00_Gestion_Projet/assets (Up 2 levels)
+    # Original script was in 00_Gestion_Projet/Scripts, so assets were "../assets"
+    
+    # Current structure:
+    # .../Scripts/workbook_generator/config.py
+    # .../assets
+    
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) # .../MDM programme/
+    
+    # Correcting path to match user file structure from previous context
+    # User listed: c:\Users\nblum\LLM_LAB\PROJETS\MDM programme\00_Gestion_Projet\Scripts
+    # So assets should be in 00_Gestion_Projet/assets? 
+    # Original script: os.path.join(os.path.dirname(__file__), "..", "assets", "fonts")
+    # Means assets is at 00_Gestion_Projet/assets
+    
+    SCRIPTS_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) # .../Scripts
+    PROJECT_DIR = os.path.dirname(SCRIPTS_DIR) # .../00_Gestion_Projet
+
+    FONTS_DIR = os.path.join(PROJECT_DIR, "assets", "fonts")
+    ILLUS_DIR = os.path.join(PROJECT_DIR, "assets", "illustrations")
+    
+    # Illustration Paths
+    PATH_ILLU_COVER = os.path.join(ILLUS_DIR, "01a_ILLU.png")
+    PATH_GUILLEMETS = os.path.join(ILLUS_DIR, "guillemets.png")
+    PATH_FLECHE = os.path.join(ILLUS_DIR, "fleche.png")
+    PATH_STAMP = os.path.join(ILLUS_DIR, "stamp_rouge.png")
+    PATH_BRINDILLE_1 = os.path.join(ILLUS_DIR, "brindilles1_blanc.png")
+    PATH_BRINDILLE_2 = os.path.join(ILLUS_DIR, "brindilles2_blanc.png")
+    PATH_PLUME_TEXTURE = os.path.join(ILLUS_DIR, "plume texture.png")
