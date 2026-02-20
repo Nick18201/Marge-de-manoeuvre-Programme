@@ -614,9 +614,29 @@ def create_analysis_parcours_pages(c):
     # --- PAGE 3: BILAN & MOTEURS ---
     draw_page_background(c, width, height)
     draw_title(c, "Analyse Transversale & Moteurs", 2*cm, height - 3*cm)
+
+    # Introduction Text to the Approach
+    text_y = height - 4.2*cm
+    c.setFont(PDFStyle.FONT_BODY, 10)
+    c.setFillColor(PDFStyle.COLOR_TEXT_MAIN)
+    
+    intro_lines = [
+        "Maintenant que nous avons balayé votre parcours, prenons de la hauteur.",
+        "L'objectif est de dépasser la chronologie pour comprendre votre logique interne.",
+        "",
+        "Cette analyse sert à identifier votre 'fil rouge' :",
+        "• Vos Schémas : Les répétitions (positives ou bloquantes) dans vos choix.",
+        "• Vos Moteurs : Les besoins fondamentaux qui vous donnent de l'énergie durablement.",
+        "",
+        "Il ne s'agit pas de juger votre passé, mais d'en extraire les clés pour votre futur."
+    ]
+    
+    for line in intro_lines:
+        c.drawString(2*cm, text_y, line)
+        text_y -= 0.5*cm
     
     # 3.1 J'aime / J'aime pas
-    y_cursor = height - 4.5*cm
+    y_cursor = text_y - 1*cm
     c.setFont(PDFStyle.FONT_SUBTITLE, 12)
     c.setFillColor(PDFStyle.COLOR_ACCENT_BLUE)
     c.drawString(2*cm, y_cursor, "1. Ce que j'ai appris sur mes goûts")
@@ -631,9 +651,9 @@ def create_analysis_parcours_pages(c):
     c.drawString(col1_x, y_cursor, "Ce que j'ai AIMÉ (Tâches, ambiances...) :")
     c.drawString(col2_x, y_cursor, "Ce que je n'ai PAS AIMÉ :")
     
-    y_cursor -= 4*cm
-    create_input_field(form, 'bilan_jaime', x=col1_x, y=y_cursor, width=w_box, height=3.5*cm, multiline=True)
-    create_input_field(form, 'bilan_padjaime', x=col2_x, y=y_cursor, width=w_box, height=3.5*cm, multiline=True)
+    y_cursor -= 3.5*cm
+    create_input_field(form, 'bilan_jaime', x=col1_x, y=y_cursor, width=w_box, height=3*cm, multiline=True)
+    create_input_field(form, 'bilan_padjaime', x=col2_x, y=y_cursor, width=w_box, height=3*cm, multiline=True)
 
     # 3.2 Analyse Transversale
     y_cursor -= 1.5*cm
@@ -646,8 +666,8 @@ def create_analysis_parcours_pages(c):
     c.setFillColor(PDFStyle.COLOR_TEXT_MAIN)
     c.drawString(2*cm, y_cursor, "En regardant votre parcours, qu'observez-vous ? (Répétitions, Choix par défaut, Hasard...)")
     
-    y_cursor -= 3*cm
-    create_input_field(form, 'bilan_schemas', x=2*cm, y=y_cursor, width=width-4*cm, height=2.5*cm, multiline=True)
+    y_cursor -= 2.5*cm
+    create_input_field(form, 'bilan_schemas', x=2*cm, y=y_cursor, width=width-4*cm, height=2*cm, multiline=True)
 
     # 3.3 Les Moteurs
     y_cursor -= 1.5*cm
@@ -659,10 +679,9 @@ def create_analysis_parcours_pages(c):
     
     y_cursor -= 1.5*cm
     for i in range(1, 6):
-        create_input_field(form, f'moteur_{i}', x=2*cm, y=y_cursor, width=width-4*cm, height=0.8*cm)
+        create_input_field(form, f'moteur_{i}', x=2*cm, y=y_cursor, width=width-4*cm, height=0.7*cm)
         c.drawString(1.2*cm, y_cursor + 0.2*cm, f"{i}.")
-        y_cursor -= 1.2*cm
-
+        y_cursor -= 1.0*cm
 
     c.showPage()
 
@@ -671,76 +690,198 @@ def create_tree_of_life_page(c):
     New Page: L'Arbre de Vie.
     Distinct from Genogramme.
     Structure: Racines, Sol, Tronc, Branches, Feuilles, Fruits.
+    Improved UI/UX with organic drawing and full explanatory text.
+    v3: Layout Fixes preventing overlaps.
     """
     width, height = A4
     draw_page_background(c, width, height)
-    draw_title(c, "Mon Arbre de Vie", 2*cm, height - 3*cm)
+    draw_title(c, "Mon Arbre de Vie", 2*cm, height - 2.5*cm)
 
-    c.setFont(PDFStyle.FONT_BODY, 11)
-    c.setFillColor(PDFStyle.COLOR_TEXT_MAIN)
-    c.drawString(2*cm, height - 4*cm, "Restaurer son identité narrative : vous n'êtes pas réduit à vos cicatrices.")
-
-    form = c.acroForm
+    # --- 1. INTRO & OBJECTIF ---
+    # Reserve top 4.5cm for header/intro
+    y_cursor = height - 3.5*cm
     
-    # Visual Layout
-    # Center X
-    cx = width / 2
-    ground_y = 6*cm
-    
-    # DRAWING THE TREE (Schematic)
-    c.setStrokeColor(PDFStyle.COLOR_TEXT_SECONDARY)
-    c.setLineWidth(2)
-    
-    # 1. Sol (Line)
-    c.line(2*cm, ground_y, width-2*cm, ground_y)
-    
-    # 2. Tronc (Rect)
-    trunk_w = 4*cm
-    trunk_h = 8*cm
-    trunk_bottom = ground_y
-    c.rect(cx - trunk_w/2, trunk_bottom, trunk_w, trunk_h, stroke=1, fill=0)
-    
-    # 3. Racines (Lines below)
-    c.line(cx - 1*cm, ground_y, cx - 3*cm, ground_y - 2*cm)
-    c.line(cx + 1*cm, ground_y, cx + 3*cm, ground_y - 2*cm)
-    c.line(cx, ground_y, cx, ground_y - 2.5*cm)
-    
-    # 4. Branches (Lines above)
-    crown_bottom = trunk_bottom + trunk_h
-    c.line(cx, crown_bottom, cx, crown_bottom + 4*cm)
-    c.line(cx - 2*cm, crown_bottom, cx - 5*cm, crown_bottom + 3*cm)
-    c.line(cx + 2*cm, crown_bottom, cx + 5*cm, crown_bottom + 3*cm)
-    
-    # --- INPUT ZONES ---
-    
-    # Zone 1: RACINES (Bottom Center)
-    c.setFont(PDFStyle.FONT_SUBTITLE, 10)
-    c.setFillColor(PDFStyle.COLOR_ACCENT_RED)
-    c.drawCentredString(cx, 3.5*cm, "1. RACINES (D'où je viens, mon histoire)")
-    create_input_field(form, 'arbre_racines', x=cx - 4*cm, y=1.5*cm, width=8*cm, height=1.8*cm, multiline=True)
-
-    # Zone 2: SOL (Left Bottom)
-    c.setFillColor(PDFStyle.COLOR_TEXT_MAIN)
-    c.drawString(3.5*cm, ground_y + 1*cm, "2. SOL (Besoins actuels)")
-    create_input_field(form, 'arbre_sol', x=1*cm, y=ground_y - 1.5*cm, width=5*cm, height=2*cm, multiline=True)
-
-    # Zone 3: TRONC (Center Middle)
-    c.setFillColor(PDFStyle.COLOR_TEXT_MAIN)
-    c.drawCentredString(cx, ground_y + trunk_h/2 + 3.5*cm, "3. TRONC (Compétences & Valeurs)")
-    create_input_field(form, 'arbre_tronc', x=cx - 1.8*cm, y=ground_y + 1*cm, width=3.6*cm, height=6*cm, multiline=True)
-
-    # Zone 4: BRANCHES (Top Center)
+    # Objectif styling
     c.setFillColor(PDFStyle.COLOR_ACCENT_BLUE)
-    c.drawCentredString(cx, height - 5*cm, "4. BRANCHES (Projets & Espoirs)")
-    create_input_field(form, 'arbre_branches', x=cx - 4*cm, y=height - 7*cm, width=8*cm, height=1.8*cm, multiline=True)
+    c.setFont(PDFStyle.FONT_SUBTITLE, 11)
+    c.drawString(2*cm, y_cursor, "Objectif :")
+    
+    c.setFillColor(PDFStyle.COLOR_TEXT_MAIN)
+    c.setFont(PDFStyle.FONT_BODY, 10)
+    obj_text = (
+        "Restaurer votre identité narrative. Cet exercice permet de voir que les épreuves (trauma, échec...) "
+        "ne sont que des cicatrices sur l'écorce, et non l'arbre tout entier."
+    )
+    # Simple wrapping
+    text_obj = c.beginText(4*cm, y_cursor)
+    text_obj.setFont(PDFStyle.FONT_BODY, 10)
+    text_obj.setTextOrigin(4*cm, y_cursor)
+    from reportlab.lib.utils import simpleSplit
+    # Constrain width to avoid hitting right margin
+    lines = simpleSplit(obj_text, PDFStyle.FONT_BODY, 10, width - 6*cm)
+    for line in lines:
+        text_obj.textLine(line)
+    c.drawText(text_obj)
+    
+    # --- 2. LAYOUT COORDINATES ---
+    cx = width / 2
+    
+    # Ground Level (Base of trunk)
+    ground_y = 5*cm
+    
+    # Trunk
+    trunk_width_base = 4*cm
+    trunk_width_top = 3.5*cm
+    trunk_height = 9*cm
+    trunk_top_y = ground_y + trunk_height # 14cm
+    
+    # Crown (Branches area)
+    crown_top_y = height - 5.5*cm # Leave space for header
+    
+    form = c.acroForm
 
-    # Zone 5: FEUILLES (Left Top)
+    # --- 3. ORGANIC TREE DRAWING ---
+    c.saveState()
+    c.setStrokeColor(PDFStyle.COLOR_TEXT_SECONDARY)
+    c.setLineWidth(1.5)
+    c.setLineJoin(1) 
+    c.setLineCap(1) 
+
+    # A. Sol (Uneven ground) - Draw first to be behind roots if needed, or foundation
+    p = c.beginPath()
+    p.moveTo(1*cm, ground_y)
+    # Gentle hills
+    p.curveTo(4*cm, ground_y + 0.5*cm, 6*cm, ground_y - 0.5*cm, cx, ground_y - 0.2*cm)
+    p.curveTo(width - 6*cm, ground_y + 0.4*cm, width - 4*cm, ground_y - 0.3*cm, width - 1*cm, ground_y)
+    c.drawPath(p, stroke=1, fill=0)
+
+    # B. Racines (Roots) - Below ground
+    # Central Root
+    p = c.beginPath()
+    p.moveTo(cx, ground_y - 0.2*cm)
+    p.curveTo(cx - 0.5*cm, ground_y - 1.5*cm, cx + 0.5*cm, ground_y - 2.5*cm, cx, ground_y - 3.5*cm)
+    c.drawPath(p, stroke=1, fill=0)
+    # Left Root
+    p = c.beginPath()
+    p.moveTo(cx - 1.5*cm, ground_y)
+    p.curveTo(cx - 2*cm, ground_y - 1*cm, cx - 3.5*cm, ground_y - 1.5*cm, cx - 5*cm, ground_y - 3*cm)
+    c.drawPath(p, stroke=1, fill=0)
+    # Right Root
+    p = c.beginPath()
+    p.moveTo(cx + 1.5*cm, ground_y)
+    p.curveTo(cx + 2*cm, ground_y - 1*cm, cx + 3.5*cm, ground_y - 1.5*cm, cx + 5*cm, ground_y - 3*cm)
+    c.drawPath(p, stroke=1, fill=0)
+
+    # C. Tronc (Trunk) - Wide and solid
+    p = c.beginPath()
+    # Left side
+    p.moveTo(cx - 1.8*cm, ground_y)
+    p.curveTo(cx - 1.5*cm, ground_y + 3*cm, cx - 1.5*cm, ground_y + 6*cm, cx - 1.8*cm, trunk_top_y)
+    # Right side
+    p.moveTo(cx + 1.8*cm, ground_y)
+    p.curveTo(cx + 1.5*cm, ground_y + 3*cm, cx + 1.5*cm, ground_y + 6*cm, cx + 1.8*cm, trunk_top_y)
+    c.drawPath(p, stroke=1, fill=0)
+    
+    # Textures/Cicatrices
+    c.setLineWidth(0.5)
+    c.arc(cx - 0.5*cm, ground_y + 2*cm, cx + 0.5*cm, ground_y + 2.8*cm, startAng=160, extent=50)
+    c.arc(cx + 0.2*cm, ground_y + 5*cm, cx + 1.0*cm, ground_y + 5.6*cm, startAng=200, extent=40)
+
+    # D. Crown Branches - Supporting the boxes
+    c.setLineWidth(1.5)
+    
+    # Left Branch (Holds Leaves Box) -> Aim for (1.5cm, 18cm)
+    p = c.beginPath()
+    p.moveTo(cx - 1.8*cm, trunk_top_y)
+    p.curveTo(cx - 4*cm, trunk_top_y + 2*cm, cx - 6*cm, trunk_top_y + 1*cm, 5*cm, trunk_top_y + 4*cm) 
+    c.drawPath(p, stroke=1, fill=0)
+    
+    # Right Branch (Holds Fruits Box) -> Aim for (Width-1.5cm, 18cm)
+    p = c.beginPath()
+    p.moveTo(cx + 1.8*cm, trunk_top_y)
+    p.curveTo(cx + 4*cm, trunk_top_y + 2*cm, cx + 6*cm, trunk_top_y + 1*cm, width - 5*cm, trunk_top_y + 4*cm)
+    c.drawPath(p, stroke=1, fill=0)
+    
+    # Center Branch (Holds Branches/Projects Box) -> Aim for Top Center
+    p = c.beginPath()
+    p.moveTo(cx, trunk_top_y) # Start slightly lower
+    p.curveTo(cx - 2*cm, trunk_top_y + 3*cm, cx + 2*cm, trunk_top_y + 5*cm, cx, crown_top_y - 2*cm)
+    c.drawPath(p, stroke=1, fill=0)
+
+    c.restoreState()
+
+    # --- 4. INPUT ZONES & LABELS ---
+    
+    def draw_zone(title, subtitle, x, y, w, h, align='left', color_title=PDFStyle.COLOR_TEXT_MAIN):
+        # Draw background for better readability over lines? No, looks cleaner transparent if placed well.
+        
+        # Title
+        c.setFont(PDFStyle.FONT_SUBTITLE, 10)
+        c.setFillColor(color_title)
+        
+        # Calculate text anchor positions
+        if align == 'center':
+            tx, ty = x + w/2, y + h + 0.5*cm
+            sx, sy = x + w/2, y + h + 0.1*cm
+            c.drawCentredString(tx, ty, title)
+            c.setFont(PDFStyle.FONT_ITALIC, 9)
+            c.setFillColor(PDFStyle.COLOR_TEXT_SECONDARY)
+            c.drawCentredString(sx, sy, subtitle)
+        elif align == 'right':
+            tx, ty = x + w, y + h + 0.5*cm
+            sx, sy = x + w, y + h + 0.1*cm
+            c.drawRightString(tx, ty, title)
+            c.setFont(PDFStyle.FONT_ITALIC, 9)
+            c.setFillColor(PDFStyle.COLOR_TEXT_SECONDARY)
+            c.drawRightString(sx, sy, subtitle)
+        else:
+            tx, ty = x, y + h + 0.5*cm
+            sx, sy = x, y + h + 0.1*cm
+            c.drawString(tx, ty, title)
+            c.setFont(PDFStyle.FONT_ITALIC, 9)
+            c.setFillColor(PDFStyle.COLOR_TEXT_SECONDARY)
+            c.drawString(sx, sy, subtitle)
+            
+        # Field
+        create_input_field(form, f'arbre_{title.split()[1].lower()}', x=x, y=y, width=w, height=h, multiline=True)
+
+    # 1. RACINES (Bottom Center)
+    # Position: y=1.5cm to y=3.5cm
+    draw_zone("1. RACINES", "Mon histoire, mes origines...", 
+              cx - 4.5*cm, 1.2*cm, 9*cm, 2.3*cm, align='center', color_title=PDFStyle.COLOR_ACCENT_RED)
+
+    # 2. SOL (Left Bottom)
+    # Position: y=4cm to y=6cm, Left side.
+    draw_zone("2. SOL", "Mes besoins actuels", 
+              1.5*cm, 4*cm, 5*cm, 2.5*cm, align='left')
+
+    # 3. TRONC (Center)
+    # Position: y=7cm to y=11.5cm centered on trunk.
+    # Widen box slightly to fit trunk width approx
+    c.setFont(PDFStyle.FONT_SUBTITLE, 10)
+    c.setFillColor(PDFStyle.COLOR_TEXT_MAIN)
+    c.drawCentredString(cx, 12*cm, "3. TRONC")
+    c.setFont(PDFStyle.FONT_ITALIC, 9)
     c.setFillColor(PDFStyle.COLOR_TEXT_SECONDARY)
-    c.drawString(3*cm, height - 6*cm, "5. FEUILLES (Club de Vie)")
-    create_input_field(form, 'arbre_feuilles', x=1*cm, y=height - 9*cm, width=5*cm, height=2.5*cm, multiline=True, tooltip="Personnes soutiens")
+    c.drawCentredString(cx, 11.6*cm, "Compétences & Valeurs")
+    
+    # Field overlaps the trunk drawing significantly, but that's okay, it's the "content" of the trunk.
+    create_input_field(form, 'arbre_tronc', x=cx - 2.2*cm, y=7.5*cm, width=4.4*cm, height=4*cm, multiline=True)
 
-    # Zone 6: FRUITS (Right Top)
-    c.drawString(width - 3*cm, height - 6*cm, "6. FRUITS (Cadeaux de la vie)")
-    create_input_field(form, 'arbre_fruits', x=width - 6*cm, y=height - 9*cm, width=5*cm, height=2.5*cm, multiline=True, tooltip="Réussites, bonheurs")
+    # 4. FEUILLES (Left Top)
+    # Position: y=17cm approx (trunk top is 14cm).
+    draw_zone("5. FEUILLES", "Club de Vie (Soutiens)", 
+              1.5*cm, trunk_top_y + 2*cm, 5.5*cm, 3*cm, align='left')
+
+    # 5. FRUITS (Right Top)
+    # Position: y=17cm approx
+    draw_zone("6. FRUITS", "Cadeaux & Réussites", 
+              width - 7*cm, trunk_top_y + 2*cm, 5.5*cm, 3*cm, align='right')
+
+    # 6. BRANCHES (Top Center)
+    # Position: y=22cm approx. WELL below the header (29.7 - 5 = 24.7).
+    # Box top at y+h = 22+2.5 = 24.5. Just fits.
+    draw_zone("4. BRANCHES", "Projets & Rêves", 
+              cx - 4.5*cm, trunk_top_y + 7.5*cm, 9*cm, 2.5*cm, align='center', color_title=PDFStyle.COLOR_ACCENT_BLUE)
 
     c.showPage()
