@@ -3,293 +3,329 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 from reportlab.platypus import Paragraph
 from reportlab.lib.styles import ParagraphStyle
+from reportlab.lib.enums import TA_JUSTIFY
 from reportlab.lib.units import cm
 
 from ..config import PDFStyle
 from ..components import (
     draw_page_background, draw_dot_grid, draw_card, draw_side_panel, 
-    draw_leaf, draw_title, draw_branding_logo
+    draw_leaf, draw_title, draw_branding_logo, create_standard_cover,
+    draw_circular_stamp, draw_pause_badge, draw_page_decorations,
+    draw_page_footer
 )
 from ..forms import create_input_field
 
 def create_cover_page(c):
-    width, height = A4
-    
-    # 1. Background Nude + Grid
-    # We don't use draw_page_background here because cover has special layout (Blue Band)
-    c.setFillColor(PDFStyle.COLOR_BG_NUDE)
-    c.rect(0,0, width, height, fill=1, stroke=0)
-    draw_dot_grid(c, width, height)
-
-    # 1b. Blue Side Band (Left)
-    band_width = 3.5*cm 
-    c.setFillColor(PDFStyle.COLOR_ACCENT_BLUE)
-    c.rect(0, 0, band_width, height, fill=1, stroke=0)
-
-    # A. Illustration Principale (Cover)
-    if os.path.exists(PDFStyle.PATH_ILLU_COVER):
-        content_width = width - band_width
-        img_width = content_width * 0.95 
-        center_x = band_width + (content_width - img_width) / 2
-        
-        c.drawImage(PDFStyle.PATH_ILLU_COVER, center_x, height * 0.20, width=img_width, height=height*0.5, mask='auto', preserveAspectRatio=True, anchor='sw')
-    else:
-        # Fallback
-        c.setFillColor(PDFStyle.COLOR_WHITE)
-        c.circle(width*0.35, height*0.55, 160, fill=1, stroke=0)
-
-    # 2b. Marque Header
-    logo_x = band_width + 1.5*cm
-    logo_y = height - 3*cm
-    draw_branding_logo(c, logo_x, logo_y, size=40)
-
-    # 2c. Stamp Rouge
-    if os.path.exists(PDFStyle.PATH_STAMP):
-        c.saveState()
-        c.translate(width - 4*cm, 4*cm)
-        c.rotate(-15)
-        c.drawImage(PDFStyle.PATH_STAMP, -2*cm, -2*cm, width=4*cm, height=4*cm, mask='auto', preserveAspectRatio=True, anchor='c')
-        c.restoreState()
-
-    # 3. Titres
-    c.setFont(PDFStyle.FONT_BODY, 14)
-    c.setFillColor(PDFStyle.COLOR_TEXT_MAIN)
-    c.drawRightString(width - 40, height - 210, "BILAN DE COMPÉTENCES & ALIGNEMENT") 
-    
-    c.setFont(PDFStyle.FONT_TITLE, 18)
-    c.setFillColor(PDFStyle.COLOR_ACCENT_RED)
-    c.drawRightString(width - 40, height - 240, "CHAPITRE 0 : LE PRÉLUDE")
-    
-    c.showPage()
+    create_standard_cover(c, "CHAPITRE 0 : LE PRÉLUDE")
 
 def create_summary_page(c):
-    """New Page: Au Programme (Blue Background)."""
+    """Page: Au Programme."""
     width, height = A4
     
-    # 1. Full Blue Background
     c.setFillColor(PDFStyle.COLOR_ACCENT_BLUE)
     c.rect(0, 0, width, height, fill=1, stroke=0)
     
-    # 2. Faint White Dot Grid
     draw_dot_grid(c, width, height, color=PDFStyle.COLOR_WHITE, opacity=0.1)
 
-    # 3. Content
     c.setFont(PDFStyle.FONT_TITLE, 30)
     c.setFillColor(PDFStyle.COLOR_WHITE)
     c.drawString(3*cm, height - 4*cm, "AU PROGRAMME")
     
-    c.setFont(PDFStyle.FONT_BODY, 12)
-    c.setFillColor(PDFStyle.COLOR_WHITE)
+    style_body = ParagraphStyle(
+        'SummaryBody',
+        fontName=PDFStyle.FONT_BODY,
+        fontSize=12,
+        leading=16,
+        textColor=colors.white,
+        alignment=TA_JUSTIFY
+    )
     
-    start_y = height - 6*cm
-    
-    intro_lines = [
-        "Trouver sa place dans le monde d’aujourd’hui n’est pas chose facile ; on",
-        "se réoriente, on se reforme, on réinvente la façon d’exercer son métier...",
-        "Que ce soit pour une nécessité de réalisation personnelle, un besoin de",
-        "vivre des expériences plus variées et stimulantes, une sérieuse remise en",
-        "question du rapport à l’entreprise et au travail est en marche !",
-        "",
-        "La question centrale pourrait être :",
-        "Quelle place dois-je accorder au travail dans mon existence et sous quelle forme ?",
-        "Nous allons investiguer cette question (parmi beaucoup d’autres) dans ce travail.",
-        "",
+    intro_txt = (
+        "Trouver sa place dans le monde d’aujourd’hui n’est pas chose facile ; on "
+        "se réoriente, on se reforme, on réinvente la façon d’exercer son métier... "
+        "Que ce soit pour une nécessité de réalisation personnelle, un besoin de "
+        "vivre des expériences plus variées et stimulantes, une sérieuse remise en "
+        "question du rapport à l’entreprise et au travail est en marche !<br/><br/>"
+        "La question centrale pourrait être :<br/>"
+        "<b>Quelle place dois-je accorder au travail dans mon existence et sous quelle forme ?</b><br/>"
+        "Nous allons investiguer cette question (parmi beaucoup d’autres) dans ce travail.<br/><br/>"
         "En voici les grandes lignes :"
-    ]
+    )
     
-    start_y = height - 5.5*cm
-    c.setFont(PDFStyle.FONT_BODY, 10)
-
-    for line in intro_lines:
-        c.drawString(3*cm, start_y, line)
-        start_y -= 14 
-        
-    start_y -= 0.5*cm
+    p_intro = Paragraph(intro_txt, style_body)
+    w, h = p_intro.wrap(width - 6*cm, height)
+    p_intro.drawOn(c, 3*cm, height - 5.5*cm - h)
+    
+    start_y = height - 5.5*cm - h - 1.0*cm
     
     steps = [
         ("05", "Prendre du recul", "sur vos choix passés et vos expériences."),
         ("13", "Explorer votre personnalité", "Vos forces, ce que vous aimez, vos besoins."),
-        ("32", "Actions concrètes", "Explorer ces secteurs à travers divers supports."),
+        ("32", "Actions concrètes", "découvrir des secteurs et des métiers qui me correspondent."),
         ("43", "Plan d'action", "Réussir votre projet.")
     ]
     
+    style_step = ParagraphStyle(
+        'StepRow',
+        fontName=PDFStyle.FONT_BODY,
+        fontSize=12,
+        leading=16,
+        textColor=PDFStyle.COLOR_WHITE,
+        alignment=TA_JUSTIFY
+    )
+
     for page_num, title, desc in steps:
         if os.path.exists(PDFStyle.PATH_FLECHE):
-             c.drawImage(PDFStyle.PATH_FLECHE, 2.8*cm, start_y - 0.1*cm, width=0.6*cm, height=0.6*cm, mask='auto', preserveAspectRatio=True)
+             c.drawImage(PDFStyle.PATH_FLECHE, 3.2*cm, start_y - 0.35*cm, width=0.8*cm, height=0.8*cm, mask='auto', preserveAspectRatio=True)
         else:
              c.drawString(3*cm, start_y, "->")
         
-        c.setFont(PDFStyle.FONT_TITLE, 11)
-        c.drawString(4*cm, start_y, title)
+        step_html = f"<b>{title}</b> : {desc}"
+        p_step = Paragraph(step_html, style_step)
         
-        c.setFont(PDFStyle.FONT_BODY, 11)
-        text_width = c.stringWidth(title, PDFStyle.FONT_TITLE, 11)
-        c.drawString(4*cm + text_width + 5, start_y, " : " + desc)
-        
-        start_y -= 1.0*cm
+        w_step, h_step = p_step.wrap(width - 8*cm, height)
+        p_step.drawOn(c, 4.5*cm, start_y - h_step + 10)
+        start_y -= (h_step + 0.5*cm)
 
-    # Outro Text
-    start_y -= 0.5*cm
-    outro_lines = [
-        "À votre disposition également, un site Notion réalisé par mes soins sur lequel",
-        "vous pouvez trouver à tout moment des ressources ; sites, podcasts, articles,",
-        "vidéos... Mais également des exercices complémentaires concernant la gestion",
+    outro_txt = (
+        "À votre disposition également, un site Notion réalisé par mes soins sur lequel "
+        "vous pouvez trouver à tout moment des ressources ; sites, podcasts, articles, "
+        "vidéos... Mais également des exercices complémentaires concernant la gestion "
         "de vos émotions, l’estime de soi et le détachement des attentes extérieures."
-    ]
+    )
     
-    c.setFont(PDFStyle.FONT_ITALIC, 10)
-    for line in outro_lines:
-        c.drawString(3*cm, start_y, line)
-        start_y -= 12
+    style_outro = ParagraphStyle(
+        'SummaryOutro',
+        fontName=PDFStyle.FONT_ITALIC,
+        fontSize=11,
+        leading=15,
+        textColor=PDFStyle.COLOR_WHITE,
+        alignment=TA_JUSTIFY
+    )
+    
+    p_outro = Paragraph(outro_txt, style_outro)
+    w_o, h_o = p_outro.wrap(width - 6*cm, height)
+    p_outro.drawOn(c, 3*cm, start_y - h_o)
+    
+    start_y -= h_o
 
-    # Decor
-    draw_leaf(c, width-100, 200, size=150, color=PDFStyle.COLOR_ACCENT_YELLOW, angle=-20, alpha=0.9)
-    # Red square at bottom
-    c.setFillColor(PDFStyle.COLOR_ACCENT_RED)
-    c.rect(width/2 - 40, 50, 80, 80, fill=1, stroke=0)
+    # Decor (Plume Texture)
+    if os.path.exists(PDFStyle.PATH_PLUME_TEXTURE):
+        # Top Right
+        c.saveState()
+        c.translate(width - 1*cm, height - 3*cm)
+        c.rotate(75) # Rotated 45 degrees more to the left (30 + 45)
+        c.drawImage(PDFStyle.PATH_PLUME_TEXTURE, 0, 0, width=6*cm, height=6*cm, mask='auto', preserveAspectRatio=True, anchor='ne')
+        c.restoreState()
+
+        # Bottom Left
+        c.saveState()
+        c.translate(0, 0)
+        c.rotate(10)
+        c.drawImage(PDFStyle.PATH_PLUME_TEXTURE, -2*cm, -1*cm, width=8*cm, height=8*cm, mask='auto', preserveAspectRatio=True)
+        c.restoreState()
 
     c.showPage()
 
 def create_editorial_page_card(c):
-    """Edito with Card UI."""
+    """Page: Édito avec carte."""
     width, height = A4
-    
-    draw_page_background(c, width, height)
 
-    # Card
-    card_margin = 2.5*cm
-    card_width = width - 2*card_margin
-    card_height = height - 6*cm
-    card_y = 3*cm
-    draw_card(c, card_margin, card_y, card_width, card_height)
-    
-    # Content inside Card
-    text_x = card_margin + 1*cm
-    text_top = card_y + card_height - 2*cm
-    
-    # Title
-    draw_title(c, "Le mot d'accueil", text_x, text_top)
-    
-    # Icon/Quote mark
+    draw_page_background(c, width, height, use_blobs=True)
+
+    card_x      = 3*cm
+    card_y      = 3.2*cm
+    card_w      = width - 2*card_x
+    card_h      = height - 4.8*cm - card_y
+
+    draw_card(c, card_x, card_y, card_w, card_h)
+
+    draw_branding_logo(c, 1.5*cm, height - 1.5*cm, size=13)
+
+    inner_x  = card_x + 1.0*cm
+    inner_w  = card_w  - 2.0*cm
+    title_y  = card_y + card_h - 1.5*cm
+
+    draw_title(c, "Le mot d'accueil", inner_x, title_y, size=22)
+
     if os.path.exists(PDFStyle.PATH_GUILLEMETS):
-        c.drawImage(PDFStyle.PATH_GUILLEMETS, text_x + card_width - 3*cm, text_top - 0.5*cm, width=2.5*cm, height=2.5*cm, mask='auto', preserveAspectRatio=True, anchor='ne')
+        c.drawImage(
+            PDFStyle.PATH_GUILLEMETS,
+            card_x + card_w - 4.5*cm, title_y - 0.5*cm,
+            width=2.8*cm, height=2.8*cm,
+            mask='auto', preserveAspectRatio=True
+        )
     else:
-        c.setFont(PDFStyle.FONT_HAND, 60)
+        c.saveState()
+        c.setFont(PDFStyle.FONT_HAND, 65)
         c.setFillColor(PDFStyle.COLOR_ACCENT_YELLOW)
-        c.drawRightString(text_x + card_width - 2*cm, text_top, ' " ')
+        c.drawRightString(card_x + card_w - 1.0*cm, title_y + 0.2*cm, '\u201c\u201c')
+        c.restoreState()
 
-    # Body
-    text_y = text_top - 2*cm
-    c.setFont(PDFStyle.FONT_BODY, 11)
-    c.setFillColor(PDFStyle.COLOR_TEXT_MAIN)
-    
-    lines = [
-        "Si vous entamez la lecture de ce livret, c’est que vous",
-        "êtes aujourd’hui en questionnement sur votre parcours",
-        "professionnel et que vous avez eu le courage de passer",
-        "à l’action en entamant un bilan de compétences. Bravo !",
-        "",
-        "Ce livret va être votre guide pendant cette période de",
-        "questionnements ; il sera à la fois source d’idées, d’inspirations, de",
-        "remises en question... Il recueillera votre histoire, votre parcours",
-        "et vos ressentis. Il sera votre boussole et vous le retrouverez entre",
-        "chaque séance.",
-        "",
-        "Le bilan de compétences que je vous propose est un mélange",
-        "de questionnements, d’activités créatives et d’échanges réflexifs.",
-        "Ces exercices seront des supports de travail pour nos entretiens.",
-        "N’hésitez pas à rajouter des questions ou activités qui vous",
-        "intéressent et vous semblent pertinentes pour nourrir votre",
-        "cheminement.",
-        "",
-        "Lors de votre travail personnel, je vous conseille de vous dégager",
-        "des moments de calme dans un endroit chaleureux où vous vous",
-        "sentez à l’aise et où vous ne serez pas dérangé(e). Ce sont des",
-        "temps pour vous retrouver avec vous même et laisser libre court à",
-        "votre intuition et à votre part créative."
+    text_y = title_y - 1.6*cm
+
+    style = ParagraphStyle(
+        'EditoBody',
+        fontName=PDFStyle.FONT_BODY,
+        fontSize=11,
+        leading=17,
+        textColor=PDFStyle.COLOR_TEXT_MAIN,
+        alignment=TA_JUSTIFY,
+    )
+
+    paragraphs = [
+        "Si vous entamez la lecture de ces livrets, c\u2019est que vous \u00eates aujourd\u2019hui en questionnement sur votre parcours professionnel et que vous avez eu le courage de passer \u00e0 l\u2019action en entamant un bilan de comp\u00e9tences. Bravo\u00a0!",
+        "Les livrets vont vous accompagner pendant cette p\u00e9riode de questionnement\u00a0; ils seront \u00e0 la fois source d\u2019id\u00e9es, d\u2019inspirations, de remises en question\u2026 Ils recueilleront votre histoire, votre parcours et vos ressentis. Ils seront votre boussole et vous les retrouverez entre chaque s\u00e9ance.",
+        "Le bilan de comp\u00e9tences que nous vous proposons est un m\u00e9lange de questionnements, d\u2019activit\u00e9s cr\u00e9atives et d\u2019\u00e9changes r\u00e9flexifs. Ces exercices seront des supports de travail pour nos entretiens. N\u2019h\u00e9sitez pas \u00e0 rajouter des questions ou activit\u00e9s qui vous int\u00e9ressent et vous semblent pertinentes pour nourrir votre cheminement.",
+        "Lors de votre travail personnel, je vous conseille de vous d\u00e9gager des moments de calme dans un endroit chaleureux o\u00f9 vous vous sentez \u00e0 l\u2019aise et o\u00f9 vous ne serez pas d\u00e9rang\u00e9(e). Ce sont des temps pour vous retrouver avec vous m\u00eame et laisser libre court \u00e0 votre intuition et \u00e0 votre part cr\u00e9ative.",
     ]
-    
-    for line in lines:
-        c.drawString(text_x, text_y, line)
-        text_y -= 16
 
+    for para in paragraphs:
+        p = Paragraph(para, style)
+        pw, ph = p.wrap(inner_w, height)
+        if text_y - ph >= card_y + 0.5*cm:
+            p.drawOn(c, inner_x, text_y - ph)
+        text_y -= (ph + 0.5*cm)
+
+    if os.path.exists(PDFStyle.PATH_PLANTE_BLEUE):
+        plant_w = 10*cm
+        plant_h = 12*cm
+
+        if os.path.exists(PDFStyle.PATH_PLANTE_ROSE_OMBRE):
+            c.drawImage(
+                PDFStyle.PATH_PLANTE_ROSE_OMBRE,
+                width - plant_w + 6.5*cm + 0.3*cm,
+                height - plant_h + 3*cm - 0.2*cm,
+                width=plant_w, height=plant_h,
+                mask='auto', preserveAspectRatio=True
+            )
+        
+        c.drawImage(
+            PDFStyle.PATH_PLANTE_BLEUE,
+            width - plant_w + 6.5*cm,
+            height - plant_h + 3*cm,
+            width=plant_w, height=plant_h,
+            mask='auto', preserveAspectRatio=True
+        )
+
+        c.saveState()
+        
+        corner_x = -5.5*cm
+        corner_y = -plant_h * 0.3
+        
+        if os.path.exists(PDFStyle.PATH_PLANTE_ROSE_OMBRE):
+            c.drawImage(
+                PDFStyle.PATH_PLANTE_ROSE_OMBRE,
+                corner_x + 0.3*cm, corner_y - 0.2*cm,
+                width=plant_w, height=plant_h,
+                mask='auto', preserveAspectRatio=True
+            )
+
+        c.drawImage(
+            PDFStyle.PATH_PLANTE_BLEUE,
+            corner_x, corner_y,
+            width=plant_w, height=plant_h,
+            mask='auto', preserveAspectRatio=True
+        )
+        c.restoreState()
+
+    draw_page_decorations(c, width, height)
     c.showPage()
 
+
 def create_intro_sense_page(c):
-    """
-    Introduction: Mettre du sens.
-    """
+    """Page: Introduction 'Mettre du sens'."""
     width, height = A4
     
-    draw_page_background(c, width, height)
+    draw_page_background(c, width, height, use_blobs=True)
     
-    # Card
-    card_margin = 2*cm
-    card_width = width - 2*card_margin
-    card_height = height - 4*cm
-    card_y = 2*cm
-    draw_card(c, card_margin, card_y, card_width, card_height)
+    card_x      = 2*cm
+    card_y      = 2.1*cm
+    card_w      = width - 2*card_x
+    card_h      = height - 3*cm
+    
+    draw_card(c, card_x, card_y, card_w, card_h)
 
-    # Content
-    text_x = card_margin + 1*cm
-    text_top = card_y + card_height - 1.5*cm
+    logo_x = card_x + 1*cm
+    logo_y = card_y + card_h - 1*cm
+    draw_branding_logo(c, logo_x, logo_y, size=13)
+
+    text_x = card_x + 1.5*cm
+    text_top = card_y + card_h - 4.5*cm
+    content_width = card_w - 3*cm
+
+    c.setFont(PDFStyle.FONT_TITLE, 10)
+    c.setFillColor(PDFStyle.COLOR_ACCENT_BLUE)
+    c.drawString(text_x, text_top + 1.2*cm, "INTRODUCTION")
     
-    # Title
-    draw_title(c, "Mettre du sens", text_x, text_top, size=22)
+    PURPLE_TITLE = colors.HexColor("#6C5CE7")
+    draw_title(c, "Mettre du sens", text_x, text_top, size=28, color=PURPLE_TITLE)
     
-    # Body Text
+    if os.path.exists(PDFStyle.PATH_STAMP):
+        stamp_size = 4*cm
+        c.saveState()
+        c.translate(width - stamp_size/2 - 3*cm, height - stamp_size/2 - 1.5*cm)
+        c.rotate(-10)
+        c.drawImage(
+            PDFStyle.PATH_STAMP,
+            -stamp_size/2, -stamp_size/2,
+            width=stamp_size, height=stamp_size,
+            mask='auto', preserveAspectRatio=True
+        )
+        c.restoreState()
+    
     text_y = text_top - 1.5*cm
     
     paragraphs = [
-        "La question du sens est centrale dans nos vies : savoir pour quelles raisons on fait les choses, c’est reprendre notre pouvoir d’agir en conscience.",
-        "En étudiant la psychologie et la sociologie, on prend conscience de l’importance de notre part inconsciente, des schémas et stéréotypes qui nous façonnent, des choses que l’on croit décider, vouloir, alors que nous avons été conditionnés et influencés pour le faire. Mon travail s’attache aujourd’hui à aider les personnes à remettre du sens dans leurs décisions et leurs actions professionnelles.",
-        "La question du sens va bien au-delà de l’activité professionnelle, mais c’est la porte d’entrée que je choisis ; pour une raison simple : elle concerne la majorité d’entre nous. Peu importe le milieu social ou l’origine, nous donnons tous de l’importance à nos vies par nos activités. Je pars d’un point de vue clair : nous avons tous des moyens d’apprentissage, d’adaptation, de changement. Mais nous avons tous également une nature profonde qui nous donne des facilités pour certaines choses.", 
+        "La question du sens est centrale dans nos vies : savoir pour quelles raisons nous faisons les choses, c’est reprendre notre pouvoir d’agir en conscience.",
+        "En étudiant la psychologie et la sociologie, nous prenons conscience de l’importance de notre part inconsciente, des schémas et stéréotypes qui nous façonnent, des choses que nous croyons décider ou vouloir, alors que nous avons été conditionnés et influencés pour le faire. Notre travail s’attache aujourd’hui à aider les personnes à remettre du sens dans leurs décisions et leurs actions professionnelles.",
+        "La question du sens va bien au-delà de l’activité professionnelle, mais c’est la porte d’entrée que nous choisissons ; pour une raison simple : elle concerne la majorité d’entre nous. Peu importe le milieu social ou l’origine, nous donnons tous de l’importance à nos vies par nos activités. Nous partons d’un point de vue clair : nous avons tous des moyens d’apprentissage, d’adaptation, de changement. Mais nous avons tous également une nature profonde qui nous donne des facilités pour certaines choses.",
         "Notre expérience, notre socialisation et d’autres facteurs innés font que nous avons une certaine personnalité. Elle se construit et se développe tout au long de la vie, mais nous sommes toujours différents de notre voisin. Nous avons des aptitudes différentes, des forces différentes, des goûts différents. Et c’est très bien ; c’est ce qui nous permet, en société, de pouvoir remplir des rôles et des fonctions complémentaires !",
-        "Le mal-être au travail est plus que jamais un sujet central dans notre société ; la montée des burn-out, bore et brown-out en est malheureusement le témoin. Les phénomènes des Bullshits jobs (tâches inutiles, superficielles et vides de sens effectuées dans le monde du travail), les attentes différentes des nouvelles générations (millennials, Z), l’urgence climatique qui génère de l’écoanxiété… sont autant de raisons qui cohabitent. Mon objectif aujourd’hui est de vous accompagner à vous recentrer sur qui vous êtes, afin de pouvoir vous épanouir réellement dans vos choix professionnels.",
-        "L’épanouissement professionnel est un objectif ambitieux, mais comme on ne va pas commencer un travail personnel avec des objectifs au ras des pâquerettes, allons-y !"
+        "Pourtant, malgré cette complémentarité potentielle, le lien entre qui nous sommes et ce que nous faisons au quotidien peut parfois se distendre ou se briser.",
+        "Le mal-être au travail est plus que jamais un sujet central dans notre société ; la montée des burn-out, bore et brown-out en est malheureusement le témoin. Les phénomènes des Bullshits jobs (tâches inutiles, superficielles et vides de sens effectuées dans le monde du travail), les attentes différentes des nouvelles générations (millennials, Z), l’urgence climatique qui génère de l’écoanxiété… sont autant de raisons qui cohabitent. Notre objectif aujourd’hui est de vous accompagner à vous recentrer sur qui vous êtes, afin de pouvoir vous épanouir réellement dans vos choix professionnels.",
+        "L’épanouissement professionnel est un objectif ambitieux, mais comme nous n'allons pas commencer un travail personnel avec des objectifs au ras des pâquerettes, allons-y !"
     ]
     
     style = ParagraphStyle(
-        'Normal',
+        'IntroSenseBody',
         fontName=PDFStyle.FONT_BODY,
-        fontSize=11,
-        leading=14,
-        textColor=PDFStyle.COLOR_TEXT_MAIN
+        fontSize=11.5,
+        leading=16,
+        textColor=PDFStyle.COLOR_ACCENT_BLUE,
+        alignment=TA_JUSTIFY
     )
     
     for paragraph in paragraphs:
         p = Paragraph(paragraph, style)
-        w, h = p.wrap(card_width - 2*cm, height) # Max width
-        
-        p.drawOn(c, text_x, text_y - h)
-        
-        text_y -= (h + 10) 
-
+        pw, ph = p.wrap(content_width, height)
+        if text_y - ph < card_y + 0.5*cm:
+            break
+        p.drawOn(c, text_x, text_y - ph)
+        text_y -= (ph + 0.5*cm)
+    
+    draw_page_footer(c, width, height)
     c.showPage()
 
 def create_form_page_card(c):
-    """Form Page with Card UI."""
+    """Page: Mon Engagement (Formulaire)."""
     width, height = A4
     
     draw_page_background(c, width, height)
     
-    # Card
     card_margin = 2*cm
-    card_width = width - 2*card_margin
-    card_height = height - 5*cm
-    card_y = 2.5*cm
+    # card_width = width - 2*card_margin
+    # card_height = height - 5*cm
+    # card_y = 2*cm
     draw_side_panel(c, card_margin, width, height)
 
-    # Content
-    text_x = card_margin + 1*cm
-    text_top = card_y + card_height - 2*cm
+    text_x = card_margin + 2*cm
+    text_top = height - 4*cm
     
     draw_title(c, "Mon Engagement", text_x, text_top)
 
     form = c.acroForm
     start_y = text_top - 2*cm
     
-    # 1. Identité
     c.setFont(PDFStyle.FONT_BODY, 12)
     c.setFillColor(PDFStyle.COLOR_TEXT_MAIN)
     c.drawString(text_x, start_y, "Moi, ")
@@ -298,7 +334,6 @@ def create_form_page_card(c):
                        x=text_x + 1.5*cm, y=start_y-5, width=8*cm, height=20, 
                        tooltip='Prénom Nom')
     
-    # 2. Temps
     start_y -= 2*cm
     c.drawString(text_x, start_y, "décide d'investir")
     
@@ -308,28 +343,27 @@ def create_form_page_card(c):
                        
     c.drawString(text_x + 5.5*cm, start_y, "heures par semaine.")
     
-    # 3. Objectif
     start_y -= 2*cm
     c.drawString(text_x, start_y, "Mon objectif principal :")
     start_y -= 0.5*cm
     
     create_input_field(form, 'objectif_3_mois',
-                       x=text_x, y=start_y - 2*cm, width=card_width - 2*cm, height=2*cm,
+                       x=text_x, y=start_y - 2*cm, width=width - text_x - 1*cm, height=2*cm,
                        tooltip='Objectif', multiline=True)
                        
-    # 4. Permission
     start_y -= 3*cm 
     c.drawString(text_x, start_y, "Je m'autorise à :")
     start_y -= 0.5*cm
     
     create_input_field(form, 'permission_personnelle',
-                       x=text_x, y=start_y - 2*cm, width=card_width - 2*cm, height=2*cm,
+                       x=text_x, y=start_y - 2*cm, width=width - text_x - 1*cm, height=2*cm,
                        tooltip='Permission', multiline=True)
     
     # Hidden Fields
     form.textfield(name='meta_doc_type', value='workbook_chap0', x=0, y=-10, width=0, height=0)
     form.textfield(name='meta_doc_version', value='1.3_da_v4', x=0, y=-10, width=0, height=0)
 
+    draw_page_decorations(c, width, height, part_title="INTRODUCTION", x_offset=card_margin)
     c.showPage()
 
 def create_premiere_etape_page(c):
@@ -340,14 +374,12 @@ def create_premiere_etape_page(c):
     """
     width, height = A4
     
-    # 1. Full Blue Background with texture/grain if possible, but here solid blue + grid
     c.setFillColor(PDFStyle.COLOR_ACCENT_BLUE)
     c.rect(0, 0, width, height, fill=1, stroke=0)
     
     # Faint Grid
     draw_dot_grid(c, width, height, color=PDFStyle.COLOR_WHITE, opacity=0.1)
 
-    # 2. Large Number "1."
     # Moved higher and to the left to avoid overlap, and made smaller/more transparent
     c.saveState()
     c.setFont(PDFStyle.FONT_BRANDING, 160) 
@@ -355,7 +387,6 @@ def create_premiere_etape_page(c):
     c.drawString(1.5*cm, height - 9*cm, "1.")
     c.restoreState()
 
-    # 3. Titles
     # Shifted down slightly to be distinct from the watermarked number
     start_y = height - 10*cm
     c.setFont(PDFStyle.FONT_BRANDING, 32)
@@ -363,25 +394,16 @@ def create_premiere_etape_page(c):
     c.drawString(2.5*cm, start_y, "Première étape :")
     c.drawString(2.5*cm, start_y - 1.2*cm, "Faire le point")
 
-    # 4. "Appuyer sur Pause" Badge
     badge_y = start_y - 3*cm
     c.saveState()
     
     c.setFont(PDFStyle.FONT_BRANDING, 13)
     c.drawString(2*cm + 1.5*cm, badge_y, "APPUYER SUR PAUSE")
     
-    # Circle
-    c.setStrokeColor(PDFStyle.COLOR_WHITE)
-    c.setLineWidth(1.5)
-    c.circle(2.5*cm, badge_y + 0.15*cm, 0.4*cm, fill=0, stroke=1)
-    # Pause bars
-    c.setFillColor(PDFStyle.COLOR_WHITE)
-    c.rect(2.35*cm, badge_y, 0.1*cm, 0.3*cm, fill=1, stroke=0)
-    c.rect(2.55*cm, badge_y, 0.1*cm, 0.3*cm, fill=1, stroke=0)
+    draw_pause_badge(c, 2.5*cm, badge_y)
     
     c.restoreState()
 
-    # 5. Text Blocks
     text_y = badge_y - 2*cm
     
     style_white = ParagraphStyle(
@@ -403,13 +425,12 @@ def create_premiere_etape_page(c):
         p.drawOn(c, 2.5*cm, text_y - h) # Aligned with title
         text_y -= (h + 0.8*cm)
 
-    # 6. Illustrations (Plume Texture)
     # Replaced brindilles with plume texture, scaled down
     if os.path.exists(PDFStyle.PATH_PLUME_TEXTURE):
         # Top Right
         c.saveState()
         c.translate(width - 1*cm, height - 3*cm)
-        c.rotate(30)
+        c.rotate(75) # Rotated 45 degrees more to the left (30 + 45)
         # Smaller size: 5x5 cm approx
         c.drawImage(PDFStyle.PATH_PLUME_TEXTURE, 0, 0, width=5*cm, height=5*cm, mask='auto', preserveAspectRatio=True, anchor='ne')
         c.restoreState()
@@ -449,16 +470,13 @@ def create_faire_le_point_pages(c):
     for idx_part, (questions, part_label) in enumerate(parts):
         draw_page_background(c, width, height)
         
-        # Card
+        # Side Panel (Full Height)
         card_margin = 2*cm
         card_width = width - 2*card_margin
-        card_height = height - 4*cm
-        card_y = 2*cm
         draw_side_panel(c, card_margin, width, height)
         
-        # Header
         text_x = card_margin + 1*cm
-        text_top = card_y + card_height - 1.5*cm
+        text_top = height - 3.5*cm
         
         draw_title(c, f"Faire le Point : Ma Situation ({part_label})", text_x, text_top, size=20)
         
@@ -489,11 +507,12 @@ def create_faire_le_point_pages(c):
             
             create_input_field(form, f's1_point_{key}',
                                x=text_x, y=mid_y,
-                               width=card_width - 2*cm, height=field_height,
+                               width=width - text_x - 1*cm, height=field_height,
                                tooltip=question, multiline=True)
                            
             current_y -= (field_height + gap + 0.5*cm)
 
+        draw_page_decorations(c, width, height, part_title="1. FAIRE LE POINT", x_offset=card_margin)
         c.showPage()
 
 def create_domaines_de_vie_page(c):
@@ -508,19 +527,35 @@ def create_domaines_de_vie_page(c):
     # Card
     card_margin = 2*cm
     card_width = width - 2*card_margin
-    card_height = height - 4*cm
-    card_y = 2*cm
     draw_side_panel(c, card_margin, width, height)
 
-    # Title
+    # Content
     text_x = card_margin + 1*cm
-    text_top = card_y + card_height - 1.5*cm
+    text_top = height - 3.5*cm
     
     draw_title(c, "Les Domaines de Vie", text_x, text_top, size=22)
     
-    c.setFont(PDFStyle.FONT_BODY, 12)
-    c.setFillColor(PDFStyle.COLOR_TEXT_MAIN)
-    c.drawString(text_x, text_top - 1*cm, "Évaluez l'équilibre actuel (Note de 1 à 10)")
+    # Intro Text (Psycho-education)
+    style_intro = ParagraphStyle(
+        'DomainIntro',
+        fontName=PDFStyle.FONT_BODY,
+        fontSize=11,
+        leading=14,
+        textColor=PDFStyle.COLOR_TEXT_MAIN,
+        alignment=TA_JUSTIFY
+    )
+    
+    intro_txt = (
+        "Notre vie est composée de multiples facettes qui interagissent toutes entre elles. "
+        "Prendre le temps d'observer son niveau de satisfaction dans chacun de ces domaines "
+        "permet d'obtenir une « photographie » de son équilibre actuel.<br/><br/>"
+        "<b>Consigne :</b> Pour chacun des domaines ci-dessous, attribuez une note de 1 "
+        "(très peu satisfait•e) à 10 (pleinement épanoui•e)."
+    )
+    
+    p_intro = Paragraph(intro_txt, style_intro)
+    w_i, h_i = p_intro.wrap(width - text_x - 1*cm, height)
+    p_intro.drawOn(c, text_x, text_top - 1.2*cm - h_i)
     
     # 8 Domains
     domains = [
@@ -535,8 +570,9 @@ def create_domaines_de_vie_page(c):
     ]
     
     form = c.acroForm
-    start_y = text_top - 2.5*cm
-    col_width = (card_width - 2*cm) / 2
+    start_y = text_top - 1.5*cm - h_i - 0.5*cm
+    panel_width = width - card_margin
+    col_width = (panel_width - 2*cm) / 2
     
     # Grid layout for domains (2 columns)
     for i, domain in enumerate(domains):
@@ -547,7 +583,20 @@ def create_domaines_de_vie_page(c):
         y_pos = start_y - (row * 1.5*cm)
         
         c.setFont(PDFStyle.FONT_BODY, 11)
+        c.setFillColor(PDFStyle.COLOR_TEXT_MAIN)
         c.drawString(x_pos, y_pos, domain)
+        
+        # Dotted lines for alignment
+        text_w = c.stringWidth(domain, PDFStyle.FONT_BODY, 11)
+        dot_start = x_pos + text_w + 0.2*cm
+        dot_end = x_pos + 6.3*cm
+        
+        if dot_end > dot_start:
+            c.setDash(1, 2)
+            c.setStrokeColor(colors.lightgrey)
+            c.line(dot_start, y_pos + 0.1*cm, dot_end, y_pos + 0.1*cm)
+            c.setDash()
+            c.setStrokeColor(colors.black)
         
         # Rating Box
         create_input_field(form, f's1_domaine_note_{i+1}',
@@ -555,24 +604,42 @@ def create_domaines_de_vie_page(c):
                            width=1.5*cm, height=0.6*cm,
                            tooltip='Note /10')
 
-    # Reflection Question
+    # Reflection Section
     reflection_y = start_y - (4 * 1.5*cm) - 1*cm
     
-    draw_title(c, "Réflexion", text_x, reflection_y, size=14)
+    style_refl = ParagraphStyle(
+        'ReflBody',
+        fontName=PDFStyle.FONT_BODY,
+        fontSize=11,
+        leading=15,
+        textColor=PDFStyle.COLOR_TEXT_MAIN,
+        alignment=TA_JUSTIFY
+    )
     
-    c.setFont(PDFStyle.FONT_BODY, 12)
-    c.setFillColor(PDFStyle.COLOR_TEXT_MAIN)
-    c.drawString(text_x, reflection_y - 0.8*cm, "Quel est l'impact de votre travail actuel sur les autres aspects de votre vie ?")
+    refl_intro = (
+        "<b>Analyse de votre équilibre</b><br/>"
+        "Prenez du recul sur vos notes : quels sont les domaines les plus satisfaisants ? "
+        "Les moins satisfaisants ? Quel est l'impact de votre travail actuel "
+        "(positif comme négatif) sur ces autres aspects de votre vie ?"
+    )
+    
+    p_refl = Paragraph(refl_intro, style_refl)
+    w_r, h_r = p_refl.wrap(width - text_x - 1*cm, height)
+    p_refl.drawOn(c, text_x, reflection_y - h_r)
     
     # Large Text Area for Reflection
-    area_height = reflection_y - 2*cm - card_y # Remaining space
-    if area_height < 5*cm: area_height = 5*cm
+    area_top = reflection_y - h_r - 0.5*cm
+    area_bottom = 2.5*cm # Margin from bottom
+    area_height = area_top - area_bottom
+    
+    if area_height < 3*cm: area_height = 3*cm
     
     create_input_field(form, 's1_domaine_reflexion',
-                       x=text_x, y=card_y + 1*cm,
-                       width=card_width - 2*cm, height=area_height - 1*cm,
+                       x=text_x, y=area_bottom,
+                       width=width - text_x - 1*cm, height=area_height,
                        tooltip='Votre réflexion', multiline=True)
 
+    draw_page_decorations(c, width, height, part_title="1. FAIRE LE POINT", x_offset=card_margin)
     c.showPage()
 
 def create_entourage_page(c):
@@ -584,41 +651,68 @@ def create_entourage_page(c):
     
     draw_page_background(c, width, height)
     
-    # Card
+    # Side Panel (Full Height)
     card_margin = 2*cm
     card_width = width - 2*card_margin
-    card_height = height - 4*cm
-    card_y = 2*cm
     draw_side_panel(c, card_margin, width, height)
 
-    # Title
     text_x = card_margin + 1*cm
-    text_top = card_y + card_height - 1.5*cm
+    text_top = height - 3.5*cm
     
     draw_title(c, "Mon Entourage", text_x, text_top, size=22)
     
+    # Intro Text (Psycho-education)
+    style_intro = ParagraphStyle(
+        'EntourageIntro',
+        fontName=PDFStyle.FONT_BODY,
+        fontSize=11,
+        leading=14,
+        textColor=PDFStyle.COLOR_TEXT_MAIN,
+        alignment=TA_JUSTIFY
+    )
+    
+    intro_txt = (
+        "Le projet que vous menez ne se fait pas en vase clos. Votre entourage, "
+        "qu'il soit proche ou plus lointain, joue un rôle crucial dans votre "
+        "cheminement. Identifier vos alliés et les sources de tensions possibles "
+        "est une étape importante pour sécuriser votre parcours."
+    )
+    
+    p_intro = Paragraph(intro_txt, style_intro)
+    w_i, h_i = p_intro.wrap(width - text_x - 1*cm, height)
+    p_intro.drawOn(c, text_x, text_top - 1.2*cm - h_i)
+
     # Calculate Areas
-    available_height = text_top - card_y - 2*cm
-    half_height = available_height / 2
+    available_top = text_top - 1.5*cm - h_i - 0.5*cm
+    available_bottom = 2.5*cm
+    panel_height = available_top - available_bottom
+    half_height = panel_height / 2
     
     form = c.acroForm
     
     # Section 1: Soutiens
-    y_soutiens = text_top - 1.5*cm
-    draw_title(c, "Qui peut vous soutenir dans cette démarche ?", text_x, y_soutiens, size=14, color=PDFStyle.COLOR_SUCCESS)
-    
+    y_soutiens = available_top
+    draw_title(c, "Soutien, conseil en positif", text_x, y_soutiens, size=14, color=PDFStyle.COLOR_SUCCESS)
+    c.setFont(PDFStyle.FONT_BODY, 9)
+    c.setFillColor(PDFStyle.COLOR_TEXT_MAIN)
+    c.drawString(text_x, y_soutiens - 0.5*cm, "Qui peut vous soutenir ou vous conseiller utilement dans cette démarche ?")
+
     create_input_field(form, 's1_entourage_soutiens',
-                       x=text_x, y=y_soutiens - half_height + 0.5*cm,
-                       width=card_width - 2*cm, height=half_height - 1.5*cm,
+                       x=text_x, y=y_soutiens - half_height + 0.8*cm,
+                       width=width - text_x - 1*cm, height=half_height - 1.5*cm,
                        tooltip='Vos soutiens', multiline=True)
                    
     # Section 2: Freins
-    y_freins = y_soutiens - half_height
-    draw_title(c, "Qui pourrait être un frein ?", text_x, y_freins, size=14, color=PDFStyle.COLOR_ACCENT_RED)
-    
+    y_freins = y_soutiens - half_height 
+    draw_title(c, "Regard négatif ou anxiété des proches", text_x, y_freins, size=14, color=PDFStyle.COLOR_ACCENT_RED)
+    c.setFont(PDFStyle.FONT_BODY, 9)
+    c.setFillColor(PDFStyle.COLOR_TEXT_MAIN)
+    c.drawString(text_x, y_freins - 0.5*cm, "Qui pourrait exprimer des doutes, des craintes ou un regard critique ?")
+
     create_input_field(form, 's1_entourage_freins',
-                       x=text_x, y=y_freins - half_height + 0.5*cm,
-                       width=card_width - 2*cm, height=half_height - 1.5*cm,
+                       x=text_x, y=y_freins - half_height + 0.8*cm,
+                       width=width - text_x - 1*cm, height=half_height - 1.5*cm,
                        tooltip='Vos freins', multiline=True)
 
+    draw_page_decorations(c, width, height, part_title="1. FAIRE LE POINT", x_offset=card_margin)
     c.showPage()

@@ -13,7 +13,7 @@ def build_complete_pdf_v4(output_filename):
     register_fonts()
     
     c = canvas.Canvas(output_filename, pagesize=A4)
-    c.setTitle("Marge de Manœuvre - Chapitre 0")
+    c.setTitle("chapitre 0 : Le prélude")
     
     create_cover_page(c)
     create_summary_page(c)
@@ -30,5 +30,5 @@ def build_complete_pdf_v4(output_filename):
     print(f"PDF 'DA V4' Generated: {output_filename}")
 
 if __name__ == "__main__":
-    final_output = "Workbook_Chap0_Modular.pdf"
+    final_output = "chapitre 0 _ Le prélude.pdf"
     build_complete_pdf_v4(final_output)

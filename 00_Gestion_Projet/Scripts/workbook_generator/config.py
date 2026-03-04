@@ -9,15 +9,18 @@ class PDFStyle:
     COLOR_ACCENT_RED = colors.HexColor("#FF4D4D")    # Rouge Vif (Secondary)
     COLOR_ACCENT_YELLOW = colors.HexColor("#FFEB3B") # Jaune Soleil (Tertiary)
     COLOR_WHITE = colors.HexColor("#FFFFFF")         # Blanc Pur
-    COLOR_TEXT_MAIN = colors.HexColor("#2A2A35")     # Gunmetal
+    COLOR_TEXT_MAIN = colors.HexColor("#3434C2")     # Indigo Électrique (Formerly Gunmetal)
     COLOR_TEXT_SECONDARY = colors.HexColor("#808090") # Gris Souris
     COLOR_SUCCESS = colors.HexColor("#2E7D32")       # Vert Succès
+    COLOR_FIELD_BG = colors.HexColor("#F0F4FF")      # Fond Bleu Clair pour champs de texte
+    COLOR_CARD_CREME = colors.HexColor("#FDF9F2")    # Couleur Crème pour les cartes/blocs
+    COLOR_BG_BLOB = colors.HexColor("#FADADD")       # Zones roses plus prononcées
 
     # B. Typography
     FONT_TITLE = "Montserrat-Bold"
     FONT_SUBTITLE = "Montserrat-SemiBold"
-    FONT_BODY = "Lato-Regular"
-    FONT_ITALIC = "Lato-Italic"
+    FONT_BODY = "Montserrat-Regular"
+    FONT_ITALIC = "Montserrat-Italic"
     FONT_HAND = "Caveat-Regular"
     FONT_BRANDING = "Montserrat-Black"
     
@@ -61,3 +64,5 @@ class PDFStyle:
     PATH_BRINDILLE_1 = os.path.join(ILLUS_DIR, "brindilles1_blanc.png")
     PATH_BRINDILLE_2 = os.path.join(ILLUS_DIR, "brindilles2_blanc.png")
     PATH_PLUME_TEXTURE = os.path.join(ILLUS_DIR, "plume texture.png")
+    PATH_PLANTE_BLEUE = os.path.join(ILLUS_DIR, "plante bleue copy.png")
+    PATH_PLANTE_ROSE_OMBRE = os.path.join(ILLUS_DIR, "plante rose ombre copy.png")

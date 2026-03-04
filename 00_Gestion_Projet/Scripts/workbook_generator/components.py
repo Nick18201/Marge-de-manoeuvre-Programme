@@ -3,12 +3,101 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import cm
 from .config import PDFStyle
 
-def draw_page_background(c, width, height):
-    """Refactored: Standard background with Nude color, Dot Grid, and Marginal Signature."""
+import math
+
+def draw_page_background(c, width, height, use_blobs=False):
+    """Refactored: Standard background with Nude color, Dot Grid, and Waves."""
     c.setFillColor(PDFStyle.COLOR_BG_NUDE)
     c.rect(0, 0, width, height, fill=1, stroke=0)
+    
+    if use_blobs:
+        draw_background_blobs(c, width, height)
+    else:
+        draw_wavy_background(c, width, height)
+        
     draw_dot_grid(c, width, height)
     draw_marginal_signature(c, height)
+    
+def draw_page_decorations(c, width, height, part_title=None, x_offset=0):
+    """Draws Header (Logo + part title) and Footer (Page num) on top of the content."""
+    if part_title is not None:
+        draw_page_header(c, part_title, width, height, x_offset=x_offset)
+    draw_page_footer(c, width, height, x_offset=x_offset)
+
+def draw_wavy_background(c, width, height):
+    """Draws subtle organic wave shapes in the background."""
+    c.saveState()
+    c.setFillColor(colors.HexColor("#F8E8DA"), alpha=0.4) # Subtle darker nude
+    
+    # Top Left Wave
+    p1 = c.beginPath()
+    p1.moveTo(0, height)
+    p1.curveTo(width*0.3, height, width*0.5, height*0.85, 0, height*0.65)
+    c.drawPath(p1, fill=1, stroke=0)
+    
+    # Bottom Right Wave
+    p2 = c.beginPath()
+    p2.moveTo(width, 0)
+    p2.curveTo(width*0.7, 0, width*0.5, height*0.15, width, height*0.35)
+    c.drawPath(p2, fill=1, stroke=0)
+    
+    c.restoreState()
+
+def draw_background_blobs(c, width, height):
+    """Draws large soft organic blobs (circles/ellipses) at Top-Right and Bottom-Left."""
+    c.saveState()
+    # Use the specifically defined pink blob color
+    c.setFillColor(PDFStyle.COLOR_BG_BLOB, alpha=0.5)
+    
+    # Top Right Blob - slightly larger
+    c.circle(width * 0.95, height * 0.92, 140, fill=1, stroke=0)
+    
+    # Bottom Blob - spans full width, starts higher, ends lower
+    # We'll use a large ellipse for the bottom one
+    # Moved center a bit higher (~15% of height) and made it very wide
+    ellipse_w = width * 1.4
+    ellipse_h = height * 0.4
+    c.ellipse(-width*0.2, -height*0.1, width*1.2, height*0.35, fill=1, stroke=0)
+    
+    # Alternatively, use multiple circles to create a "wavy" fill at the bottom
+    # but based on "traverser toute la largeur", a large horizontal ellipse or rect-to-curve is better.
+    # Let's use a path for organic feel
+    p = c.beginPath()
+    p.moveTo(0, height * 0.25) # Starts higher
+    p.curveTo(width * 0.3, height * 0.3, width * 0.7, height * 0.1, width, height * 0.2)
+    p.lineTo(width, 0)
+    p.lineTo(0, 0)
+    p.close()
+    c.drawPath(p, fill=1, stroke=0)
+    
+    c.restoreState()
+
+def draw_page_header(c, part_title, width, height, x_offset=0):
+    """Draws the standard header: small logo left, part title right."""
+    c.saveState()
+    # Left Logo - Shifted by x_offset + internal padding
+    logo_y = height - 1.5*cm
+    draw_branding_logo(c, x_offset + 0.8*cm, logo_y, size=12)
+    
+    # Right Part Title - Shifted from right edge
+    if part_title:
+        c.setFont(PDFStyle.FONT_TITLE, 10)
+        c.setFillColor(PDFStyle.COLOR_ACCENT_RED)
+        c.drawRightString(width - 1.2*cm, logo_y, part_title.upper())
+    c.restoreState()
+
+def draw_page_footer(c, width, height, x_offset=0):
+    """Draws the standard footer: page number centered relative to the content area."""
+    c.saveState()
+    page_num = c.getPageNumber()
+    c.setFont(PDFStyle.FONT_TITLE, 10)
+    c.setFillColor(PDFStyle.COLOR_ACCENT_RED)
+    
+    # Center relative to the panel if x_offset is provided
+    content_area_center = x_offset + (width - x_offset) / 2.0
+    c.drawCentredString(content_area_center, 1.5*cm, str(page_num))
+    c.restoreState()
+
 
 def draw_dot_grid(c, width, height, color=PDFStyle.COLOR_ACCENT_BLUE, opacity=0.25):
     """Draws the signature Dot Grid."""
@@ -31,25 +120,25 @@ def draw_marginal_signature(c, height):
     c.restoreState()
 
 def draw_card(c, x, y, width, height):
-    """Draws a white rounded card with shadow."""
+    """Draws a creme rounded card with shadow."""
     c.saveState()
-    # Shadow
-    c.setFillColor(colors.black, alpha=0.05)
+    # Soft Shadow
+    c.setFillColor(colors.black, alpha=0.03)
     c.roundRect(x+3, y-3, width, height, PDFStyle.CARD_RADIUS, fill=1, stroke=0)
     # Card
-    c.setFillColor(PDFStyle.COLOR_WHITE)
+    c.setFillColor(PDFStyle.COLOR_CARD_CREME)
     c.roundRect(x, y, width, height, PDFStyle.CARD_RADIUS, fill=1, stroke=0)
     c.restoreState()
 
 def draw_side_panel(c, x, page_width, page_height):
-    """Draws a white panel extending to Top, Bottom, Right."""
+    """Draws a creme panel extending to Top, Bottom, Right."""
     c.saveState() 
     # Shadow (Left side only)
     c.setFillColor(colors.black, alpha=0.05)
     c.rect(x-3, 0, page_width - x + 3, page_height, fill=1, stroke=0)
     
-    # Main White Panel
-    c.setFillColor(PDFStyle.COLOR_WHITE)
+    # Main Creme Panel
+    c.setFillColor(PDFStyle.COLOR_CARD_CREME)
     c.rect(x, 0, page_width - x, page_height, fill=1, stroke=0)
     c.restoreState()
 
@@ -156,3 +245,112 @@ def draw_section_separator(c, x, y, width, color=PDFStyle.COLOR_ACCENT_BLUE):
     c.line(x + width/2 + 0.5*cm, y, x + width, y)
     
     c.restoreState()
+import os
+
+def draw_circular_stamp(c, x, y, text, radius=1.8*cm):
+    """Draws text curved around a central point, simulating a stamp."""
+    c.saveState()
+    c.translate(x, y)
+    c.rotate(-15) # slight tilt
+    
+    c.setFont(PDFStyle.FONT_TITLE, 8)
+    c.setFillColor(PDFStyle.COLOR_ACCENT_RED)
+    
+    chars = text + " · "
+    angle_step = 360 / len(chars)
+    for i, char in enumerate(chars):
+        c.saveState()
+        angle = math.radians(i * angle_step)
+        char_x = radius * math.sin(angle)
+        char_y = radius * math.cos(angle)
+        c.translate(char_x, char_y)
+        c.rotate(-math.degrees(angle))
+        c.drawCentredString(0, 0, char)
+        c.restoreState()
+        
+    c.setStrokeColor(PDFStyle.COLOR_ACCENT_RED)
+    c.setLineWidth(1)
+    # Simple placeholder shape in the center (hands/clap icon approximation)
+    c.circle(0, 0.2*cm, radius*0.4, stroke=1, fill=0)
+    c.line(-radius*0.3, -0.1*cm, radius*0.3, -0.1*cm)
+    c.line(-radius*0.2, -0.3*cm, radius*0.2, -0.3*cm)
+    
+    c.restoreState()
+
+def draw_pause_badge(c, x, y, radius=0.4*cm):
+    """Draws the 'Pause' badge icon (circle with Play + Pause bars)."""
+    c.saveState()
+    
+    # Circle
+    c.setStrokeColor(PDFStyle.COLOR_WHITE)
+    c.setLineWidth(1.5)
+    c.circle(x, y + 0.15*cm, radius, fill=0, stroke=1)
+    
+    # Pause bars
+    bar_width = 0.08*cm
+    bar_height = 0.3*cm
+    c.setFillColor(PDFStyle.COLOR_WHITE)
+    c.rect(x - 0.15*cm, y, bar_width, bar_height, fill=1, stroke=0)
+    
+    # Play triangle
+    p = c.beginPath()
+    p.moveTo(x + 0.02*cm, y)
+    p.lineTo(x + 0.02*cm, y + bar_height)
+    p.lineTo(x + 0.22*cm, y + bar_height/2)
+    p.close()
+    c.drawPath(p, fill=1, stroke=0)
+    
+    c.restoreState()
+
+def create_standard_cover(c, subtitle, title="BILAN DE COMPÉTENCES & ALIGNEMENT"):
+    """
+    Standard Cover Page generator for Workbooks.
+    """
+    width, height = A4
+    
+    # 1. Background Nude + Grid
+    c.setFillColor(PDFStyle.COLOR_BG_NUDE)
+    c.rect(0, 0, width, height, fill=1, stroke=0)
+    draw_dot_grid(c, width, height)
+
+    # 1b. Blue Side Band (Left)
+    band_width = 1.75*cm 
+    c.setFillColor(PDFStyle.COLOR_ACCENT_BLUE)
+    c.rect(0, 0, band_width, height, fill=1, stroke=0)
+
+    # A. Illustration Principale (Cover)
+    if os.path.exists(PDFStyle.PATH_ILLU_COVER):
+        content_width = width - band_width
+        img_width = content_width * 0.75 
+        center_x = band_width + (content_width - img_width) / 2
+        
+        c.drawImage(PDFStyle.PATH_ILLU_COVER, center_x, height * 0.10, width=img_width, height=height*0.5, mask='auto', preserveAspectRatio=True, anchor='sw')
+    else:
+        # Fallback
+        c.setFillColor(PDFStyle.COLOR_WHITE)
+        c.circle(width*0.35, height*0.55, 160, fill=1, stroke=0)
+
+    # 2b. Marque Header
+    logo_x = band_width + 1.5*cm
+    logo_y = height - 3*cm
+    draw_branding_logo(c, logo_x, logo_y, size=40)
+
+    # 2c. Stamp Rouge
+    if os.path.exists(PDFStyle.PATH_STAMP):
+        c.saveState()
+        c.translate(width - 4*cm, 4*cm)
+        c.rotate(-15)
+        c.drawImage(PDFStyle.PATH_STAMP, -2*cm, -2*cm, width=4*cm, height=4*cm, mask='auto', preserveAspectRatio=True, anchor='c')
+        c.restoreState()
+
+    # 3. Titres
+    c.setFont(PDFStyle.FONT_BODY, 14)
+    c.setFillColor(PDFStyle.COLOR_TEXT_MAIN)
+    c.drawRightString(width - 40, height - 210, title) 
+    
+    c.setFont(PDFStyle.FONT_TITLE, 18)
+    c.setFillColor(PDFStyle.COLOR_ACCENT_RED)
+    c.drawRightString(width - 40, height - 240, subtitle)
+    
+    c.showPage()
+

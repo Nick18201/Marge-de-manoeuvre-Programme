@@ -19,8 +19,8 @@ def register_fonts():
     font_map = [
         ("Montserrat-Bold", "Montserrat-Bold.ttf", "FONT_TITLE"),
         ("Montserrat-Black", "Montserrat-Black.ttf", "FONT_BRANDING"),
-        ("Lato-Regular", "Lato-Regular.ttf", "FONT_BODY"),
-        ("Lato-Italic", "Lato-Italic.ttf", "FONT_ITALIC"),
+        ("Montserrat-Regular", "Montserrat-Regular.ttf", "FONT_BODY"),
+        ("Montserrat-Italic", "Montserrat-Italic.ttf", "FONT_ITALIC"),
         ("AmaticSC-Regular", "AmaticSC-Regular.ttf", "FONT_HAND"), 
         ("Caveat-Regular", "Caveat-Regular.ttf", "FONT_HAND"),
         ("Montserrat-SemiBold", "Montserrat-SemiBold.ttf", "FONT_SUBTITLE"),

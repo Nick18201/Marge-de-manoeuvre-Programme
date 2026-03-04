@@ -3,8 +3,8 @@ from .config import PDFStyle
 
 def create_input_field(form, name, x, y, width, height, tooltip='', multiline=False, value=''):
     """Helper to create consistent input fields."""
-    bg_color = PDFStyle.COLOR_WHITE
-    border_color = colors.lightgrey
+    bg_color = PDFStyle.COLOR_FIELD_BG
+    border_color = PDFStyle.COLOR_FIELD_BG
     
     # Flags: 'multiline' allows multiple lines. 
     # 'doNotScroll' is NOT set, so it should scroll if text exceeds area.

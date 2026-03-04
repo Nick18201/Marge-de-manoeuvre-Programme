@@ -9,7 +9,8 @@ from reportlab.lib.units import cm
 from ..config import PDFStyle
 from ..components import (
     draw_page_background, draw_dot_grid, draw_card, draw_side_panel, 
-    draw_leaf, draw_title, draw_branding_logo, draw_section_separator
+    draw_leaf, draw_title, draw_branding_logo, draw_section_separator,
+    create_standard_cover, draw_circular_stamp, draw_pause_badge, draw_page_decorations
 )
 from ..forms import create_input_field
 
@@ -17,54 +18,7 @@ def create_chap2_cover(c):
     """
     Cover Page for Chapter 2: Mes Racines.
     """
-    width, height = A4
-    
-    # 1. Background Nude + Grid
-    c.setFillColor(PDFStyle.COLOR_BG_NUDE)
-    c.rect(0,0, width, height, fill=1, stroke=0)
-    draw_dot_grid(c, width, height)
-
-    # 1b. Blue Side Band (Left)
-    band_width = 3.5*cm 
-    c.setFillColor(PDFStyle.COLOR_ACCENT_BLUE)
-    c.rect(0, 0, band_width, height, fill=1, stroke=0)
-
-    # A. Illustration Principale (Cover)
-    # Using Chap 0 logic or placeholder
-    if os.path.exists(PDFStyle.PATH_ILLU_COVER):
-        content_width = width - band_width
-        img_width = content_width * 0.95 
-        center_x = band_width + (content_width - img_width) / 2
-        
-        c.drawImage(PDFStyle.PATH_ILLU_COVER, center_x, height * 0.20, width=img_width, height=height*0.5, mask='auto', preserveAspectRatio=True, anchor='sw')
-    else:
-        # Fallback
-        c.setFillColor(PDFStyle.COLOR_WHITE)
-        c.circle(width*0.35, height*0.55, 160, fill=1, stroke=0)
-
-    # 2b. Marque Header
-    logo_x = band_width + 1.5*cm
-    logo_y = height - 3*cm
-    draw_branding_logo(c, logo_x, logo_y, size=40)
-
-    # 2c. Stamp Rouge
-    if os.path.exists(PDFStyle.PATH_STAMP):
-        c.saveState()
-        c.translate(width - 4*cm, 4*cm)
-        c.rotate(-15)
-        c.drawImage(PDFStyle.PATH_STAMP, -2*cm, -2*cm, width=4*cm, height=4*cm, mask='auto', preserveAspectRatio=True, anchor='c')
-        c.restoreState()
-
-    # 3. Titres Specific to Chap 2
-    c.setFont(PDFStyle.FONT_BODY, 14)
-    c.setFillColor(PDFStyle.COLOR_TEXT_MAIN)
-    c.drawRightString(width - 40, height - 210, "BILAN DE COMPÉTENCES & ALIGNEMENT") 
-    
-    c.setFont(PDFStyle.FONT_TITLE, 18)
-    c.setFillColor(PDFStyle.COLOR_ACCENT_RED)
-    c.drawRightString(width - 40, height - 240, "CHAPITRE 2 : MES RACINES")
-    
-    c.showPage()
+    create_standard_cover(c, "CHAPITRE 2 : MES RACINES")
 
 def create_psycho_edu_pages(c):
     """
@@ -74,13 +28,15 @@ def create_psycho_edu_pages(c):
     width, height = A4
     
     # --- PAGE 1: INTRO & HABITUS ---
-    draw_page_background(c, width, height)
-    draw_title(c, "Comprendre ses Racines", 2*cm, height - 2.5*cm)
+    # Side Panel (Full Height)
+    card_margin = 2*cm
+    draw_side_panel(c, card_margin, width, height)
+    draw_title(c, "Comprendre ses Racines", card_margin + 0.5*cm, height - 2.5*cm)
     c.setFont(PDFStyle.FONT_SUBTITLE, 12)
     c.setFillColor(PDFStyle.COLOR_ACCENT_BLUE)
-    c.drawString(2*cm, height - 3.2*cm, "Pour choisir son avenir")
+    c.drawString(card_margin + 0.5*cm, height - 3.2*cm, "Pour choisir son avenir")
 
-    text_x = 2*cm
+    text_x = card_margin + 0.5*cm
     text_y = height - 4.5*cm
     line_height = 14 # Slightly tighter
     
@@ -115,7 +71,6 @@ def create_psycho_edu_pages(c):
     ]
     text_y = draw_paragraph_block(c, "Introduction : Pourquoi regarder en arrière ?", intro_lines, text_y)
 
-    # 1. Le Sac à Dos Social
     habitus_lines = [
         "Imaginez que vous avez un logiciel installé en vous depuis l'enfance. Ce logiciel, c'est l'Habitus :",
         "votre manière spontanée de réagir, de parler, de vous tenir, héritée de vos parents et de votre",
@@ -140,14 +95,15 @@ def create_psycho_edu_pages(c):
     ]
     text_y = draw_paragraph_block(c, "Le sentiment d'illégitimité (Syndrome de l'Imposteur)", imposteur_lines, text_y, color_title=PDFStyle.COLOR_TEXT_MAIN)
 
+    draw_page_decorations(c, width, height, part_title="2. MES RACINES", x_offset=card_margin)
     c.showPage()
     
     # --- PAGE 2: CONTRAT & SOUFFRANCE ---
     draw_page_background(c, width, height)
-    draw_title(c, "Comprendre ses Racines (suite)", 2*cm, height - 2.5*cm)
+    draw_side_panel(c, card_margin, width, height)
+    draw_title(c, "Comprendre ses Racines (suite)", text_x, height - 2.5*cm)
     text_y = height - 4.5*cm
 
-    # 2. Le Contrat Familial
     contrat_lines = [
         "Chaque famille possède un « Grand Livre de Comptes » invisible. On y inscrit ce que l'on doit",
         "à ses parents.",
@@ -165,7 +121,6 @@ def create_psycho_edu_pages(c):
     ]
     text_y = draw_paragraph_block(c, "2. Le Contrat Familial Secret", contrat_lines, text_y)
 
-    # 3. Souffrance au Travail
     souffrance_lines = [
         "Le travail, ce n'est pas juste exécuter une tâche. C'est y mettre du sien.",
         "Quand on ne peut pas faire son travail « bien » (selon ses propres critères), on souffre.",
@@ -177,11 +132,13 @@ def create_psycho_edu_pages(c):
     ]
     text_y = draw_paragraph_block(c, "3. La Souffrance et le Plaisir au Travail", souffrance_lines, text_y)
 
+    draw_page_decorations(c, width, height, part_title="2. MES RACINES", x_offset=card_margin)
     c.showPage()
 
     # --- PAGE 3: PISTES ET OUTILS ---
     draw_page_background(c, width, height)
-    draw_title(c, "Les Outils pour Avancer", 2*cm, height - 2.5*cm)
+    draw_side_panel(c, card_margin, width, height)
+    draw_title(c, "Les Outils pour Avancer", text_x, height - 2.5*cm)
     text_y = height - 4.5*cm
 
     pistes_lines = [
@@ -216,12 +173,14 @@ def create_psycho_edu_pages(c):
     text_y = draw_paragraph_block(c, "C. L'Objectif : La Différenciation", obj_lines, text_y, color_title=PDFStyle.COLOR_ACCENT_BLUE)
 
     # Conclusion Box
-    draw_card(c, 2*cm, text_y - 3*cm, width - 4*cm, 2.5*cm)
+    draw_card(c, card_margin + 0.5*cm, text_y - 3*cm, width - card_margin - 1.5*cm, 2.5*cm)
     c.setFont(PDFStyle.FONT_ITALIC, 11)
     c.setFillColor(PDFStyle.COLOR_TEXT_MAIN)
-    c.drawCentredString(width/2, text_y - 1.5*cm, "En éclairant ces zones d'ombre, vous transformez")
-    c.drawCentredString(width/2, text_y - 2*cm, "des chaînes invisibles en tremplins.")
+    center_x = card_margin + (width - card_margin) / 2.0
+    c.drawCentredString(center_x, text_y - 1.5*cm, "En éclairant ces zones d'ombre, vous transformez")
+    c.drawCentredString(center_x, text_y - 2*cm, "des chaînes invisibles en tremplins.")
 
+    draw_page_decorations(c, width, height, part_title="2. MES RACINES", x_offset=card_margin)
     c.showPage()
 
 
@@ -232,10 +191,12 @@ def create_timeline_page(c):
     """
     width, height = A4
     draw_page_background(c, width, height)
-    draw_title(c, "Ma Ligne de Vie (Les Montagnes Russes)", 2*cm, height - 3*cm)
+    card_margin = 2*cm
+    draw_side_panel(c, card_margin, width, height)
+    draw_title(c, "Ma Ligne de Vie (Les Montagnes Russes)", card_margin + 0.5*cm, height - 3*cm)
 
     # Main vertical line
-    center_x = width / 2
+    center_x = card_margin + (width - card_margin) / 2.0
     margin_top = height - 5*cm
     margin_bottom = 3*cm
     c.setStrokeColor(PDFStyle.COLOR_TEXT_SECONDARY)
@@ -253,10 +214,10 @@ def create_timeline_page(c):
     
     c.setFont(PDFStyle.FONT_SUBTITLE, 12)
     c.setFillColor(PDFStyle.COLOR_ACCENT_BLUE)
-    c.drawString(2*cm, margin_top + 0.5*cm, "Les Sommets (Positifs)")
+    c.drawString(card_margin + 0.5*cm, margin_top + 0.5*cm, "Les Sommets (Positifs)")
     
     c.setFillColor(PDFStyle.COLOR_ACCENT_RED)
-    c.drawRightString(width - 2*cm, margin_top + 0.5*cm, "Les Vallées (Apprentissages)")
+    c.drawRightString(width - 1.5*cm, margin_top + 0.5*cm, "Les Vallées (Apprentissages)")
 
     positions = [
         ("Sommet 1", "left", margin_top - 3*cm),
@@ -276,10 +237,10 @@ def create_timeline_page(c):
         c.setStrokeColor(PDFStyle.COLOR_TEXT_SECONDARY)
         c.setDash([2, 2])
         if side == "left":
-            x_box = 2*cm
+            x_box = card_margin + 0.5*cm
             c.line(center_x, y_pos, x_box + 7*cm, y_pos)
         else:
-            x_box = center_x + 2*cm
+            x_box = center_x + 1*cm
             c.line(center_x, y_pos, x_box, y_pos)
         c.setDash([])
 
@@ -298,6 +259,7 @@ def create_timeline_page(c):
                            x=x_box, y=y_pos - 1.5*cm, 
                            width=7*cm, height=1.6*cm, multiline=True)
 
+    draw_page_decorations(c, width, height, part_title="2. MES RACINES", x_offset=card_margin)
     c.showPage()
 
 def create_skills_transfer_page(c):
@@ -306,17 +268,20 @@ def create_skills_transfer_page(c):
     """
     width, height = A4
     draw_page_background(c, width, height)
-    draw_title(c, "Mes Compétences de Vie", 2*cm, height - 3*cm)
+    card_margin = 2*cm
+    draw_side_panel(c, card_margin, width, height)
+    draw_title(c, "Mes Compétences de Vie", card_margin + 0.5*cm, height - 3*cm)
 
     c.setFont(PDFStyle.FONT_BODY, 11)
     c.setFillColor(PDFStyle.COLOR_TEXT_MAIN)
-    c.drawString(2*cm, height - 4*cm, "Transformons votre vécu en capital. Je ne pars pas de zéro, je pars de mon expérience.")
+    c.drawString(card_margin + 0.5*cm, height - 4*cm, "Transformons votre vécu en capital. Je ne pars pas de zéro, je pars de mon expérience.")
 
     # Table Headers
     y_start = height - 6*cm
-    col1_x = 2*cm
-    col2_x = width/2 + 1*cm
-    col_width = (width - 5*cm) / 2
+    center_x = card_margin + (width - card_margin) / 2.0
+    col1_x = card_margin + 0.5*cm
+    col2_x = center_x + 1*cm
+    col_width = (width - card_margin - 3*cm) / 2
     
     c.setFont(PDFStyle.FONT_SUBTITLE, 12)
     c.setFillColor(PDFStyle.COLOR_ACCENT_BLUE)
@@ -356,6 +321,7 @@ def create_skills_transfer_page(c):
 
         y_row -= row_height
 
+    draw_page_decorations(c, width, height, part_title="SÉANCE 3", x_offset=card_margin)
     c.showPage()
 
 def create_heritage_page(c):
@@ -365,23 +331,25 @@ def create_heritage_page(c):
     """
     width, height = A4
     draw_page_background(c, width, height)
-    draw_title(c, "Mon Héritage (Matrice 3FVS)", 2*cm, height - 3*cm)
+    card_margin = 2*cm
+    draw_side_panel(c, card_margin, width, height)
+    draw_title(c, "Mon Héritage (Matrice 3FVS)", card_margin + 0.5*cm, height - 3*cm)
     
     c.setFont(PDFStyle.FONT_BODY, 11)
     c.setFillColor(PDFStyle.COLOR_TEXT_MAIN)
-    c.drawString(2*cm, height - 4*cm, "Identifiez ce que vous avez reçu pour décider de ce que vous en faites.")
+    c.drawString(card_margin + 0.5*cm, height - 4*cm, "Identifiez ce que vous avez reçu pour décider de ce que vous en faites.")
 
     form = c.acroForm
     
     # BOXES LAYOUT
-    box_w = width - 4*cm
+    text_x = card_margin + 0.5*cm
+    box_w = width - text_x - 1*cm
     box_h = 3*cm
     y_cursor = height - 5.5*cm
     
-    # 1. FORCES (Ce que je garde)
     c.setFont(PDFStyle.FONT_SUBTITLE, 12)
     c.setFillColor(PDFStyle.COLOR_ACCENT_BLUE)
-    c.drawString(2*cm, y_cursor, "1. FORCES (Ce que je garde / Résilience)")
+    c.drawString(text_x, y_cursor, "1. FORCES (Ce que je garde / Résilience)")
     
     c.setFont(PDFStyle.FONT_BODY, 10)
     c.setFillColor(PDFStyle.COLOR_TEXT_SECONDARY)
@@ -389,7 +357,6 @@ def create_heritage_page(c):
     
     create_input_field(form, 'heritage_forces', x=2*cm, y=y_cursor - 4*cm, width=box_w, height=3*cm, multiline=True)
     
-    # 2. VIGILANCES (Ce que je laisse)
     y_cursor -= 6*cm
     c.setFont(PDFStyle.FONT_SUBTITLE, 12)
     c.setFillColor(PDFStyle.COLOR_ACCENT_RED)
@@ -401,7 +368,6 @@ def create_heritage_page(c):
     
     create_input_field(form, 'heritage_vigilances', x=2*cm, y=y_cursor - 4*cm, width=box_w, height=3*cm, multiline=True)
     
-    # 3. SOUHAITS (Mandats & Dettes)
     y_cursor -= 6*cm
     c.setFont(PDFStyle.FONT_SUBTITLE, 12)
     c.setFillColor(PDFStyle.COLOR_TEXT_MAIN)
@@ -417,6 +383,7 @@ def create_heritage_page(c):
     c.setFont(PDFStyle.FONT_ITALIC, 10)
     c.drawCentredString(width/2, 2*cm, "On ne trahit pas ses origines en choisissant sa propre voie. On les honore différemment.")
 
+    draw_page_decorations(c, width, height, part_title="SÉANCE 2", x_offset=card_margin)
     c.showPage()
 
 def create_mentors_page(c):
@@ -425,9 +392,10 @@ def create_mentors_page(c):
     """
     width, height = A4
     draw_page_background(c, width, height)
-    draw_title(c, "Mentors & Anti-Modèles", 2*cm, height - 3*cm)
+    card_margin = 2*cm
+    draw_side_panel(c, card_margin, width, height)
+    draw_title(c, "Mentors & Anti-Modèles", card_margin + 0.5*cm, height - 3*cm)
 
-    # 1. Mentors
     y_start = height - 5*cm
     c.setFont(PDFStyle.FONT_SUBTITLE, 14)
     c.setFillColor(PDFStyle.COLOR_ACCENT_BLUE)
@@ -443,7 +411,6 @@ def create_mentors_page(c):
                        width=width - 4*cm, height=5*cm, 
                        multiline=True, tooltip="J'admire X pour...")
 
-    # 2. Anti-Modèles
     y_anti = y_start - 7.5*cm
     c.setFont(PDFStyle.FONT_SUBTITLE, 14)
     c.setFillColor(PDFStyle.COLOR_ACCENT_RED)
@@ -459,6 +426,7 @@ def create_mentors_page(c):
                        width=width - 4*cm, height=5*cm, 
                        multiline=True, tooltip="Je ne veux pas reproduire...")
                        
+    draw_page_decorations(c, width, height, part_title="SÉANCE 2", x_offset=card_margin)
     c.showPage()
 
 def create_work_image_page(c):
@@ -468,12 +436,13 @@ def create_work_image_page(c):
     """
     width, height = A4
     draw_page_background(c, width, height)
-    draw_title(c, "Image du Monde du Travail", 2*cm, height - 3*cm)
+    card_margin = 2*cm
+    draw_side_panel(c, card_margin, width, height)
+    draw_title(c, "Image du Monde du Travail", card_margin + 0.5*cm, height - 3*cm)
 
     form = c.acroForm
     y_cursor = height - 4.5*cm
 
-    # 1. Consigne de Visualisation
     c.setFont(PDFStyle.FONT_SUBTITLE, 12)
     c.setFillColor(PDFStyle.COLOR_ACCENT_BLUE)
     c.drawString(2*cm, y_cursor, "1. Exploration Sensorielle & Emotionnelle")
@@ -491,7 +460,6 @@ def create_work_image_page(c):
                        width=width - 4*cm, height=2.5*cm, 
                        multiline=True, tooltip="Décrivez l'ambiance sensorielle du travail de vos parents...")
     
-    # 2. Héritage Familial
     y_cursor -= 1.5*cm
     c.setFont(PDFStyle.FONT_SUBTITLE, 12)
     c.setFillColor(PDFStyle.COLOR_ACCENT_RED)
@@ -513,7 +481,6 @@ def create_work_image_page(c):
         create_input_field(form, q_id, x=2*cm, y=y_cursor, width=width-4*cm, height=q_height, multiline=True)
         y_cursor -= 0.6*cm
 
-    # 3. Les Mots du Travail
     # Split into 2 columns
     y_cursor -= 1*cm
     c.setFont(PDFStyle.FONT_SUBTITLE, 12)
@@ -533,87 +500,81 @@ def create_work_image_page(c):
     c.drawString(width/2 + 0.5*cm, y_cursor, "5 Mots pour mon futur travail (Désir) :")
     create_input_field(form, 'image_mots_futur', x=width/2 + 0.5*cm, y=y_cursor - 3*cm, width=col_width, height=2.8*cm, multiline=True)
 
+    draw_page_decorations(c, width, height, part_title="SÉANCE 2", x_offset=card_margin)
     c.showPage()
 
 def create_analysis_parcours_pages(c):
     """
-    New Pages: Analyse du Parcours & des Moteurs.
-    3 Pages:
-    1. Etudes & Formations
-    2. Expériences Pro
-    3. Bilan & Moteurs
+    Pages: Analyse du Parcours & des Moteurs.
+    1 & 2. Blocs d'Expériences (Pro, Etudes, Perso)
+    3. Bilan & Moteurs (Schémas et Moteurs)
     """
     width, height = A4
     form = c.acroForm
+    card_margin = 2*cm
     
-    # --- PAGE 1: FORMATIONS ---
-    draw_page_background(c, width, height)
-    draw_title(c, "Analyse du Parcours : Études & Formations", 2*cm, height - 3*cm)
-    
-    c.setFont(PDFStyle.FONT_BODY, 11)
-    c.setFillColor(PDFStyle.COLOR_TEXT_MAIN)
-    c.drawString(2*cm, height - 4*cm, "Analysez vos motivations pour chaque étape majeure de votre formation.")
-
-    # Table Header
-    y_header = height - 5.5*cm
-    col_x = [2*cm, 4*cm, 9*cm, 14*cm] # x positions for Année, Nom, Motiv, Compétences
-    col_w = [2*cm, 5*cm, 5*cm, 5*cm]
-    
-    headers = ["Année", "Formation / Sujet", "Motivations (Pourquoi ?)", "Compétences acquises"]
-    
-    c.setFillColor(PDFStyle.COLOR_ACCENT_BLUE)
-    c.setFont(PDFStyle.FONT_SUBTITLE, 10)
-    for i, h in enumerate(headers):
-        c.drawString(col_x[i], y_header, h)
+    # --- PAGES 1 & 2: BLOCS D'EXPERIENCES ---
+    for page_num in range(2):
+        draw_page_background(c, width, height)
+        draw_side_panel(c, card_margin, width, height)
+        draw_title(c, "Analyse du Parcours", card_margin + 0.5*cm, height - 3*cm)
         
-    # Table Rows (4 rows)
-    y_row = y_header - 1*cm
-    row_h = 3*cm
-    
-    for i in range(5):
-        for j, w in enumerate(col_w):
-            create_input_field(form, f'form_row{i}_col{j}', 
-                               x=col_x[j], y=y_row - row_h + 0.2*cm, 
-                               width=w - 0.2*cm, height=row_h - 0.4*cm, 
-                               multiline=True)
-        y_row -= row_h
-
-    c.showPage()
-
-    # --- PAGE 2: EXPERIENCES PRO ---
-    draw_page_background(c, width, height)
-    draw_title(c, "Analyse du Parcours : Expériences Pro", 2*cm, height - 3*cm)
-    
-    c.setFont(PDFStyle.FONT_BODY, 11)
-    c.setFillColor(PDFStyle.COLOR_TEXT_MAIN)
-    c.drawString(2*cm, height - 4*cm, "Vos expériences les plus significatives (Salarié, Stage, Bénévolat...).")
-
-    # Table Header
-    y_header = height - 5.5*cm
-    col_x = [2*cm, 4*cm, 9*cm, 14*cm] 
-    col_w = [2*cm, 5*cm, 5*cm, 5*cm]
-    
-    headers = ["Année", "Poste / Structure", "Motivations pour ce poste", "Missions principales"]
-    
-    c.setFillColor(PDFStyle.COLOR_ACCENT_RED)
-    c.setFont(PDFStyle.FONT_SUBTITLE, 10)
-    for i, h in enumerate(headers):
-        c.drawString(col_x[i], y_header, h)
+        c.setFont(PDFStyle.FONT_BODY, 11)
+        c.setFillColor(PDFStyle.COLOR_TEXT_MAIN)
+        if page_num == 0:
+            c.drawString(2*cm, height - 4*cm, "Transformez votre vécu (études, expériences pro ou persos) en capital compétences.")
         
-    y_row = y_header - 1*cm
-    for i in range(5):
-        for j, w in enumerate(col_w):
-            create_input_field(form, f'exp_row{i}_col{j}', 
-                               x=col_x[j], y=y_row - row_h + 0.2*cm, 
-                               width=w - 0.2*cm, height=row_h - 0.4*cm, 
-                               multiline=True)
-        y_row -= row_h
+        y_cursor = height - 5.5*cm
+        
+        for block_idx in range(2):
+            global_exp_idx = page_num * 2 + block_idx + 1
+            
+            # Draw block Background/Border
+            c.setStrokeColor(PDFStyle.COLOR_ACCENT_BLUE if block_idx == 0 else PDFStyle.COLOR_ACCENT_RED)
+            c.setLineWidth(1)
+            c.roundRect(1.5*cm, y_cursor - 9.5*cm, width - 3*cm, 10*cm, 0.5*cm)
+            
+            c.setFont(PDFStyle.FONT_SUBTITLE, 11)
+            c.setFillColor(PDFStyle.COLOR_ACCENT_BLUE if block_idx == 0 else PDFStyle.COLOR_ACCENT_RED)
+            c.drawString(2*cm, y_cursor, f"Expérience {global_exp_idx}")
+            
+            # Inputs
+            # Ligne 1: Titre / Année
+            c.setFont(PDFStyle.FONT_BODY, 9)
+            c.setFillColor(PDFStyle.COLOR_TEXT_MAIN)
+            c.drawString(2*cm, y_cursor - 0.7*cm, "Titre de poste et entreprise (ou Sujet d'étude) :")
+            create_input_field(form, f'exp_{global_exp_idx}_titre', x=2*cm, y=y_cursor - 1.5*cm, width=10*cm, height=0.6*cm)
+            
+            c.drawString(13*cm, y_cursor - 0.7*cm, "Année(s) :")
+            create_input_field(form, f'exp_{global_exp_idx}_annee', x=13*cm, y=y_cursor - 1.5*cm, width=6*cm, height=0.6*cm)
+            
+            # Ligne 2: Missions & Compétences (2 columns)
+            col_w = (width - 5*cm) / 2
+            col1_x = 2*cm
+            col2_x = 2.5*cm + col_w
+            
+            c.drawString(col1_x, y_cursor - 2.2*cm, "Fiche de poste / Missions principales :")
+            create_input_field(form, f'exp_{global_exp_idx}_missions', x=col1_x, y=y_cursor - 4.2*cm, width=col_w, height=1.8*cm, multiline=True)
+            
+            c.drawString(col2_x, y_cursor - 2.2*cm, "Compétences développées (Tech / Softskills) :")
+            create_input_field(form, f'exp_{global_exp_idx}_competences', x=col2_x, y=y_cursor - 4.2*cm, width=col_w, height=1.8*cm, multiline=True)
+            
+            # Ligne 3: Aimé / Pas Aimé (2 columns)
+            c.drawString(col1_x, y_cursor - 4.9*cm, "Ce que j'ai aimé :")
+            create_input_field(form, f'exp_{global_exp_idx}_aime', x=col1_x, y=y_cursor - 6.9*cm, width=col_w, height=1.8*cm, multiline=True)
+            
+            c.drawString(col2_x, y_cursor - 4.9*cm, "Ce que je n'ai pas aimé :")
+            create_input_field(form, f'exp_{global_exp_idx}_paime', x=col2_x, y=y_cursor - 6.9*cm, width=col_w, height=1.8*cm, multiline=True)
+            
+            y_cursor -= 10.5*cm
 
-    c.showPage()
+        draw_page_decorations(c, width, height, part_title="SÉANCE 3", x_offset=card_margin)
+        c.showPage()
 
     # --- PAGE 3: BILAN & MOTEURS ---
     draw_page_background(c, width, height)
-    draw_title(c, "Analyse Transversale & Moteurs", 2*cm, height - 3*cm)
+    draw_side_panel(c, card_margin, width, height)
+    draw_title(c, "Analyse Transversale & Moteurs", card_margin + 0.5*cm, height - 3*cm)
 
     # Introduction Text to the Approach
     text_y = height - 4.2*cm
@@ -621,61 +582,37 @@ def create_analysis_parcours_pages(c):
     c.setFillColor(PDFStyle.COLOR_TEXT_MAIN)
     
     intro_lines = [
-        "Maintenant que nous avons balayé votre parcours, prenons de la hauteur.",
+        "Maintenant que nous avons balayé vos différentes expériences, prenons de la hauteur.",
         "L'objectif est de dépasser la chronologie pour comprendre votre logique interne.",
         "",
-        "Cette analyse sert à identifier votre 'fil rouge' :",
-        "• Vos Schémas : Les répétitions (positives ou bloquantes) dans vos choix.",
-        "• Vos Moteurs : Les besoins fondamentaux qui vous donnent de l'énergie durablement.",
-        "",
-        "Il ne s'agit pas de juger votre passé, mais d'en extraire les clés pour votre futur."
+        "Cette analyse sert à identifier votre 'fil rouge' :"
     ]
-    
     for line in intro_lines:
         c.drawString(2*cm, text_y, line)
         text_y -= 0.5*cm
-    
-    # 3.1 J'aime / J'aime pas
+        
     y_cursor = text_y - 1*cm
     c.setFont(PDFStyle.FONT_SUBTITLE, 12)
-    c.setFillColor(PDFStyle.COLOR_ACCENT_BLUE)
-    c.drawString(2*cm, y_cursor, "1. Ce que j'ai appris sur mes goûts")
-    
-    y_cursor -= 0.8*cm
-    col1_x = 2*cm
-    col2_x = width/2 + 0.5*cm
-    w_box = (width - 5*cm)/2
-    
-    c.setFont(PDFStyle.FONT_BODY, 10)
-    c.setFillColor(PDFStyle.COLOR_TEXT_MAIN)
-    c.drawString(col1_x, y_cursor, "Ce que j'ai AIMÉ (Tâches, ambiances...) :")
-    c.drawString(col2_x, y_cursor, "Ce que je n'ai PAS AIMÉ :")
-    
-    y_cursor -= 3.5*cm
-    create_input_field(form, 'bilan_jaime', x=col1_x, y=y_cursor, width=w_box, height=3*cm, multiline=True)
-    create_input_field(form, 'bilan_padjaime', x=col2_x, y=y_cursor, width=w_box, height=3*cm, multiline=True)
-
-    # 3.2 Analyse Transversale
-    y_cursor -= 1.5*cm
-    c.setFont(PDFStyle.FONT_SUBTITLE, 12)
     c.setFillColor(PDFStyle.COLOR_ACCENT_RED)
-    c.drawString(2*cm, y_cursor, "2. Analyse Transversale (Les Schémas)")
+    c.drawString(2*cm, y_cursor, "1. Mes Schémas (Mon Fil Rouge)")
     
     y_cursor -= 0.8*cm
     c.setFont(PDFStyle.FONT_BODY, 10)
     c.setFillColor(PDFStyle.COLOR_TEXT_MAIN)
-    c.drawString(2*cm, y_cursor, "En regardant votre parcours, qu'observez-vous ? (Répétitions, Choix par défaut, Hasard...)")
+    c.drawString(2*cm, y_cursor, "En regardant votre parcours global, quelles répétitions ou schémas observez-vous ?")
+    c.drawString(2*cm, y_cursor - 0.5*cm, "(Ex: Choisir souvent sous la pression, rechercher l'expertise, aller au clash au bout d'un an, etc.)")
     
-    y_cursor -= 2.5*cm
-    create_input_field(form, 'bilan_schemas', x=2*cm, y=y_cursor, width=width-4*cm, height=2*cm, multiline=True)
+    y_cursor -= 4*cm
+    create_input_field(form, 'bilan_schemas', x=2*cm, y=y_cursor, width=width-4*cm, height=3.5*cm, multiline=True)
 
-    # 3.3 Les Moteurs
     y_cursor -= 1.5*cm
     c.setFont(PDFStyle.FONT_SUBTITLE, 12)
     c.setFillColor(PDFStyle.COLOR_ACCENT_BLUE)
-    c.drawString(2*cm, y_cursor, "3. Mes 5 Moteurs Principaux")
+    c.drawString(2*cm, y_cursor, "2. Mes Moteurs Fondamentaux")
+    y_cursor -= 0.5*cm
     c.setFont(PDFStyle.FONT_ITALIC, 10)
-    c.drawString(2*cm, y_cursor - 0.5*cm, "Qu'est-ce qui vous fait avancer ? (Ex: Argent, Reconnaissance, Utilité, Apprendre, Autonomie...)")
+    c.drawString(2*cm, y_cursor, "Qu'est-ce qui vous fait intimement avancer durablement ?")
+    c.drawString(2*cm, y_cursor - 0.4*cm, "(Ex: Indépendance, Sécurité financière, Apprendre, Altruisme, Compétition, Rôle d'expert...)")
     
     y_cursor -= 1.5*cm
     for i in range(1, 6):
@@ -683,6 +620,7 @@ def create_analysis_parcours_pages(c):
         c.drawString(1.2*cm, y_cursor + 0.2*cm, f"{i}.")
         y_cursor -= 1.0*cm
 
+    draw_page_decorations(c, width, height, part_title="SÉANCE 3", x_offset=card_margin)
     c.showPage()
 
 def create_tree_of_life_page(c):
@@ -695,7 +633,9 @@ def create_tree_of_life_page(c):
     """
     width, height = A4
     draw_page_background(c, width, height)
-    draw_title(c, "Mon Arbre de Vie", 2*cm, height - 2.5*cm)
+    card_margin = 2*cm
+    draw_side_panel(c, card_margin, width, height)
+    draw_title(c, "Mon Arbre de Vie", card_margin + 0.5*cm, height - 2.5*cm)
 
     # --- 1. INTRO & OBJECTIF ---
     # Reserve top 4.5cm for header/intro
@@ -724,7 +664,8 @@ def create_tree_of_life_page(c):
     c.drawText(text_obj)
     
     # --- 2. LAYOUT COORDINATES ---
-    cx = width / 2
+    center_x = card_margin + (width - card_margin) / 2.0
+    cx = center_x
     
     # Ground Level (Base of trunk)
     ground_y = 5*cm
@@ -842,20 +783,19 @@ def create_tree_of_life_page(c):
             c.setFillColor(PDFStyle.COLOR_TEXT_SECONDARY)
             c.drawString(sx, sy, subtitle)
             
-        # Field
         create_input_field(form, f'arbre_{title.split()[1].lower()}', x=x, y=y, width=w, height=h, multiline=True)
+    
+    draw_page_decorations(c, width, height, part_title="BONUS", x_offset=card_margin)
+    c.showPage()
 
-    # 1. RACINES (Bottom Center)
     # Position: y=1.5cm to y=3.5cm
     draw_zone("1. RACINES", "Mon histoire, mes origines...", 
               cx - 4.5*cm, 1.2*cm, 9*cm, 2.3*cm, align='center', color_title=PDFStyle.COLOR_ACCENT_RED)
 
-    # 2. SOL (Left Bottom)
     # Position: y=4cm to y=6cm, Left side.
     draw_zone("2. SOL", "Mes besoins actuels", 
               1.5*cm, 4*cm, 5*cm, 2.5*cm, align='left')
 
-    # 3. TRONC (Center)
     # Position: y=7cm to y=11.5cm centered on trunk.
     # Widen box slightly to fit trunk width approx
     c.setFont(PDFStyle.FONT_SUBTITLE, 10)
@@ -868,20 +808,66 @@ def create_tree_of_life_page(c):
     # Field overlaps the trunk drawing significantly, but that's okay, it's the "content" of the trunk.
     create_input_field(form, 'arbre_tronc', x=cx - 2.2*cm, y=7.5*cm, width=4.4*cm, height=4*cm, multiline=True)
 
-    # 4. FEUILLES (Left Top)
     # Position: y=17cm approx (trunk top is 14cm).
     draw_zone("5. FEUILLES", "Club de Vie (Soutiens)", 
               1.5*cm, trunk_top_y + 2*cm, 5.5*cm, 3*cm, align='left')
 
-    # 5. FRUITS (Right Top)
     # Position: y=17cm approx
     draw_zone("6. FRUITS", "Cadeaux & Réussites", 
               width - 7*cm, trunk_top_y + 2*cm, 5.5*cm, 3*cm, align='right')
 
-    # 6. BRANCHES (Top Center)
     # Position: y=22cm approx. WELL below the header (29.7 - 5 = 24.7).
     # Box top at y+h = 22+2.5 = 24.5. Just fits.
     draw_zone("4. BRANCHES", "Projets & Rêves", 
               cx - 4.5*cm, trunk_top_y + 7.5*cm, 9*cm, 2.5*cm, align='center', color_title=PDFStyle.COLOR_ACCENT_BLUE)
 
+    draw_page_decorations(c, width, height, part_title="BONUS", x_offset=card_margin)
+    c.showPage()
+
+def create_interview_page(c):
+    """
+    New Page: Interview avec une personne passionnée (Bonus).
+    """
+    width, height = A4
+    draw_page_background(c, width, height)
+    card_margin = 2*cm
+    draw_side_panel(c, card_margin, width, height)
+    draw_title(c, "Interview avec une personne passionnée", card_margin + 0.5*cm, height - 3*cm)
+
+    c.setFont(PDFStyle.FONT_BODY, 11)
+    c.setFillColor(PDFStyle.COLOR_TEXT_MAIN)
+    c.drawString(2*cm, height - 4*cm, "Rencontrez quelqu'un qui a un métier ou une vie qui vous inspire.")
+    
+    form = c.acroForm
+    y_cursor = height - 5.5*cm
+    
+    col1_x = 2*cm
+    col2_x = 10*cm
+    
+    c.setFont(PDFStyle.FONT_SUBTITLE, 10)
+    c.setFillColor(PDFStyle.COLOR_ACCENT_BLUE)
+    c.drawString(col1_x, y_cursor, "Personne interviewée :")
+    create_input_field(form, 'interview_nom', x=col1_x, y=y_cursor - 0.8*cm, width=7*cm, height=0.6*cm)
+    
+    c.drawString(col2_x, y_cursor, "Son métier / Activité :")
+    create_input_field(form, 'interview_metier', x=col2_x, y=y_cursor - 0.8*cm, width=9*cm, height=0.6*cm)
+    
+    y_cursor -= 2*cm
+    
+    questions = [
+        ("Qu'aimez-vous le plus dans ce que vous faites ?", "interview_q1", 2.5*cm),
+        ("Quelles sont les difficultés ou contraintes cachées ?", "interview_q2", 2.5*cm),
+        ("Quel conseil donneriez-vous à quelqu'un qui veut se lancer ?", "interview_q3", 2.5*cm),
+        ("Ce que j'en retiens pour moi (Mon ressenti) :", "interview_q4", 3.5*cm)
+    ]
+    
+    for q_text, q_id, q_height in questions:
+        c.setFont(PDFStyle.FONT_SUBTITLE, 11)
+        c.setFillColor(PDFStyle.COLOR_TEXT_MAIN)
+        c.drawString(2*cm, y_cursor, q_text)
+        y_cursor -= q_height + 0.2*cm
+        create_input_field(form, q_id, x=2*cm, y=y_cursor, width=width-4*cm, height=q_height, multiline=True)
+        y_cursor -= 0.8*cm
+
+    draw_page_decorations(c, width, height, part_title="BONUS", x_offset=card_margin)
     c.showPage()
