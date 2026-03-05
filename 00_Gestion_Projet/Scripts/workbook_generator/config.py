@@ -5,20 +5,20 @@ from reportlab.lib.units import cm
 class PDFStyle:
     # A. Palette de Couleurs
     COLOR_BG_NUDE = colors.HexColor("#FFF0E6")       # Fond Papier
-    COLOR_ACCENT_BLUE = colors.HexColor("#3434C2")   # Indigo Électrique (Primary)
+    COLOR_ACCENT_BLUE = colors.HexColor("#2F2EFA")   # Indigo Électrique (Primary)
     COLOR_ACCENT_RED = colors.HexColor("#FF4D4D")    # Rouge Vif (Secondary)
     COLOR_ACCENT_YELLOW = colors.HexColor("#FFEB3B") # Jaune Soleil (Tertiary)
     COLOR_WHITE = colors.HexColor("#FFFFFF")         # Blanc Pur
-    COLOR_TEXT_MAIN = colors.HexColor("#3434C2")     # Indigo Électrique (Formerly Gunmetal)
+    COLOR_TEXT_MAIN = colors.HexColor("#2F2EFA")     # Indigo Électrique (Formerly Gunmetal)
     COLOR_TEXT_SECONDARY = colors.HexColor("#808090") # Gris Souris
     COLOR_SUCCESS = colors.HexColor("#2E7D32")       # Vert Succès
     COLOR_FIELD_BG = colors.HexColor("#F0F4FF")      # Fond Bleu Clair pour champs de texte
-    COLOR_CARD_CREME = colors.HexColor("#FDF9F2")    # Couleur Crème pour les cartes/blocs
+    COLOR_CARD_CREME = colors.HexColor("#FFF8F2")    # Couleur Crème pour les cartes/blocs
     COLOR_BG_BLOB = colors.HexColor("#FADADD")       # Zones roses plus prononcées
 
     # B. Typography
-    FONT_TITLE = "Montserrat-Bold"
-    FONT_SUBTITLE = "Montserrat-SemiBold"
+    FONT_TITLE = "Montserrat-Black"
+    FONT_SUBTITLE = "Montserrat-Bold"
     FONT_BODY = "Montserrat-Regular"
     FONT_ITALIC = "Montserrat-Italic"
     FONT_HAND = "Caveat-Regular"

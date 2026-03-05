@@ -503,11 +503,11 @@ def create_faire_le_point_pages(c):
             c.drawString(text_x, current_y, question)
             
             # Field position
-            mid_y = current_y - field_height - 0.2*cm
+            mid_y = current_y - field_height - 0.5*cm
             
             create_input_field(form, f's1_point_{key}',
                                x=text_x, y=mid_y,
-                               width=width - text_x - 1*cm, height=field_height,
+                               width=width - text_x - 1.5*cm, height=field_height,
                                tooltip=question, multiline=True)
                            
             current_y -= (field_height + gap + 0.5*cm)
@@ -570,7 +570,7 @@ def create_domaines_de_vie_page(c):
     ]
     
     form = c.acroForm
-    start_y = text_top - 1.5*cm - h_i - 0.5*cm
+    start_y = text_top - 1.5*cm - h_i - 2*cm
     panel_width = width - card_margin
     col_width = (panel_width - 2*cm) / 2
     
