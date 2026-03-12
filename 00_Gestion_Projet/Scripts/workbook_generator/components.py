@@ -115,7 +115,7 @@ def draw_marginal_signature(c, height):
     c.translate(1.2*cm, height/2)
     c.rotate(90)
     c.setFont(PDFStyle.FONT_BODY, 8)
-    c.setFillColor(PDFStyle.COLOR_TEXT_SECONDARY) 
+    c.setFillColor(PDFStyle.COLOR_ACCENT_RED) 
     c.drawCentredString(0, 0, "m a r g e   d e   m a n œ u v r e")
     c.restoreState()
 
@@ -168,9 +168,10 @@ def draw_title(c, text, x, y, size=24, color=PDFStyle.COLOR_ACCENT_BLUE):
     c.drawString(x, y, text)
     c.restoreState()
 
-def draw_branding_logo(c, x, y, size=40):
+def draw_branding_logo(c, x, y, size=40, align='left'):
     """
     Draws the 'marge de manœuvre' logo with underline.
+    align: 'left' or 'center'
     """
     c.saveState()
     c.setFont(PDFStyle.FONT_BRANDING, size)
@@ -178,20 +179,25 @@ def draw_branding_logo(c, x, y, size=40):
     
     line_height = size * 1.1 # Approx line height based on font size font
     
-    c.drawString(x, y, "marge")
-    c.drawString(x, y - line_height, "de manœuvre")
+    # Calculate underline length adaptable to size
+    length = 9 * cm * (size / 40.0)
+    
+    if align == 'center':
+        c.drawCentredString(x, y, "marge")
+        c.drawCentredString(x, y - line_height, "de manœuvre")
+    else:
+        c.drawString(x, y, "marge")
+        c.drawString(x, y - line_height, "de manœuvre")
     
     # Underline
     underline_y = y - line_height - 0.3*cm
-    # specific fix for the underline length adaptable to size
-    # Base length 9cm for size 40. 
-    # ratio = size / 40.
-    # length = 9 * ratio
-    length = 9 * cm * (size / 40.0)
-    
     c.setLineWidth(3 * (size/40.0))
     c.setStrokeColor(PDFStyle.COLOR_ACCENT_RED)
-    c.line(x, underline_y, x + length, underline_y)
+    
+    if align == 'center':
+        c.line(x - length/2, underline_y, x + length/2, underline_y)
+    else:
+        c.line(x, underline_y, x + length, underline_y)
     c.restoreState()
 
 def create_closing_page(c):
@@ -202,14 +208,10 @@ def create_closing_page(c):
     draw_page_background(c, width, height)
     
     # 1. Logo Centered
-    # Calculate approx center. 
-    # "marge" is roughly 5 chars wide. "de manœuvre" is longer.
-    # We'll just place it somewhat centrally visually.
-    
-    logo_x = width/2 - 4.5*cm # Centering approx based on 9cm width
+    logo_x = width/2
     logo_y = height/2 + 2*cm
     
-    draw_branding_logo(c, logo_x, logo_y, size=40)
+    draw_branding_logo(c, logo_x, logo_y, size=40, align='center')
     
     # 2. Encouraging Text
     text_y = logo_y - 4*cm
