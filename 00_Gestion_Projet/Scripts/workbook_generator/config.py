@@ -10,7 +10,7 @@ class PDFStyle:
     COLOR_ACCENT_YELLOW = colors.HexColor("#FFEB3B") # Jaune Soleil (Tertiary)
     COLOR_WHITE = colors.HexColor("#FFFFFF")         # Blanc Pur
     COLOR_TEXT_MAIN = colors.HexColor("#2F2EFA")     # Indigo Électrique (Formerly Gunmetal)
-    COLOR_TEXT_SECONDARY = colors.HexColor("#808090") # Gris Souris
+    COLOR_TEXT_SECONDARY = colors.HexColor("#2F2EFA") # Gris Souris
     COLOR_SUCCESS = colors.HexColor("#2E7D32")       # Vert Succès
     COLOR_FIELD_BG = colors.HexColor("#F0F4FF")      # Fond Bleu Clair pour champs de texte
     COLOR_CARD_CREME = colors.HexColor("#FFF8F2")    # Couleur Crème pour les cartes/blocs

@@ -1,9 +1,9 @@
 from reportlab.lib import colors
 from .config import PDFStyle
 
-def create_input_field(form, name, x, y, width, height, tooltip='', multiline=False, value=''):
+def create_input_field(form, name, x, y, width, height, tooltip='', multiline=False, value='', fill_color=None):
     """Helper to create consistent input fields."""
-    bg_color = PDFStyle.COLOR_FIELD_BG
+    bg_color = fill_color if fill_color else PDFStyle.COLOR_FIELD_BG
     border_color = PDFStyle.COLOR_FIELD_BG
     
     # Flags: 'multiline' allows multiple lines. 
@@ -29,4 +29,19 @@ def create_input_field(form, name, x, y, width, height, tooltip='', multiline=Fa
         fieldFlags=flags,
         fontSize=font_size,
         maxlen=0
+    )
+
+def create_checkbox(form, name, x, y, size=18, tooltip=''):
+    """Helper to create consistent checkboxes."""
+    form.checkbox(
+        name=name,
+        tooltip=tooltip,
+        x=x, y=y,
+        size=size,
+        buttonStyle='check',
+        borderStyle='solid',
+        borderWidth=1,
+        borderColor=colors.black,
+        fillColor=colors.white,
+        forceBorder=False
     )
