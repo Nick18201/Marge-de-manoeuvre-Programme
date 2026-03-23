@@ -11,7 +11,7 @@ from ..components import (
     draw_page_background, draw_dot_grid, draw_card, draw_side_panel, 
     draw_leaf, draw_title, draw_branding_logo, create_standard_cover,
     draw_circular_stamp, draw_pause_badge, draw_page_decorations,
-    draw_page_footer
+    draw_page_footer, create_standard_summary_page, ExercisePageLayout
 )
 from ..forms import create_input_field
 
@@ -20,26 +20,6 @@ def create_cover_page(c):
 
 def create_summary_page(c):
     """Page: Au Programme."""
-    width, height = A4
-    
-    c.setFillColor(PDFStyle.COLOR_ACCENT_BLUE)
-    c.rect(0, 0, width, height, fill=1, stroke=0)
-    
-    draw_dot_grid(c, width, height, color=PDFStyle.COLOR_WHITE, opacity=0.1)
-
-    c.setFont(PDFStyle.FONT_TITLE, 30)
-    c.setFillColor(PDFStyle.COLOR_WHITE)
-    c.drawString(3*cm, height - 4*cm, "AU PROGRAMME")
-    
-    style_body = ParagraphStyle(
-        'SummaryBody',
-        fontName=PDFStyle.FONT_BODY,
-        fontSize=12,
-        leading=16,
-        textColor=colors.white,
-        alignment=TA_JUSTIFY
-    )
-    
     intro_txt = (
         "Trouver sa place dans le monde d’aujourd’hui n’est pas chose facile ; on "
         "se réoriente, on se reforme, on réinvente la façon d’exercer son métier... "
@@ -49,83 +29,19 @@ def create_summary_page(c):
         "La question centrale pourrait être :<br/>"
         "<b>Quelle place dois-je accorder au travail dans mon existence et sous quelle forme ?</b><br/>"
         "Nous allons investiguer cette question (parmi beaucoup d’autres) dans ce travail.<br/><br/>"
-        "En voici les grandes lignes :"
+        "En voici les grandes lignes :<br/><br/>"
+        "<i>À votre disposition également, un site Notion réalisé par mes soins sur lequel "
+        "vous pouvez trouver à tout moment des ressources ; sites, podcasts, articles...</i>"
     )
-    
-    p_intro = Paragraph(intro_txt, style_body)
-    w, h = p_intro.wrap(width - 6*cm, height)
-    p_intro.drawOn(c, 3*cm, height - 5.5*cm - h)
-    
-    start_y = height - 5.5*cm - h - 1.0*cm
     
     steps = [
-        ("05", "Prendre du recul", "sur vos choix passés et vos expériences."),
-        ("13", "Explorer votre personnalité", "Vos forces, ce que vous aimez, vos besoins."),
-        ("32", "Actions concrètes", "découvrir des secteurs et des métiers qui me correspondent."),
-        ("43", "Plan d'action", "Réussir votre projet.")
+        ("05. Prendre du recul :", "sur vos choix passés et vos expériences."),
+        ("13. Explorer votre personnalité :", "Vos forces, ce que vous aimez, vos besoins."),
+        ("32. Actions concrètes :", "découvrir des secteurs et métiers qui me correspondent."),
+        ("43. Plan d'action :", "Réussir votre projet.")
     ]
     
-    style_step = ParagraphStyle(
-        'StepRow',
-        fontName=PDFStyle.FONT_BODY,
-        fontSize=12,
-        leading=16,
-        textColor=PDFStyle.COLOR_WHITE,
-        alignment=TA_JUSTIFY
-    )
-
-    for page_num, title, desc in steps:
-        if os.path.exists(PDFStyle.PATH_FLECHE):
-             c.drawImage(PDFStyle.PATH_FLECHE, 3.2*cm, start_y - 0.35*cm, width=0.8*cm, height=0.8*cm, mask='auto', preserveAspectRatio=True)
-        else:
-             c.drawString(3*cm, start_y, "->")
-        
-        step_html = f"<b>{title}</b> : {desc}"
-        p_step = Paragraph(step_html, style_step)
-        
-        w_step, h_step = p_step.wrap(width - 8*cm, height)
-        p_step.drawOn(c, 4.5*cm, start_y - h_step + 10)
-        start_y -= (h_step + 0.5*cm)
-
-    outro_txt = (
-        "À votre disposition également, un site Notion réalisé par mes soins sur lequel "
-        "vous pouvez trouver à tout moment des ressources ; sites, podcasts, articles, "
-        "vidéos... Mais également des exercices complémentaires concernant la gestion "
-        "de vos émotions, l’estime de soi et le détachement des attentes extérieures."
-    )
-    
-    style_outro = ParagraphStyle(
-        'SummaryOutro',
-        fontName=PDFStyle.FONT_ITALIC,
-        fontSize=11,
-        leading=15,
-        textColor=PDFStyle.COLOR_WHITE,
-        alignment=TA_JUSTIFY
-    )
-    
-    p_outro = Paragraph(outro_txt, style_outro)
-    w_o, h_o = p_outro.wrap(width - 6*cm, height)
-    p_outro.drawOn(c, 3*cm, start_y - h_o)
-    
-    start_y -= h_o
-
-    # Decor (Plume Texture)
-    if os.path.exists(PDFStyle.PATH_PLUME_TEXTURE):
-        # Top Right
-        c.saveState()
-        c.translate(width - 1*cm, height - 3*cm)
-        c.rotate(75) # Rotated 45 degrees more to the left (30 + 45)
-        c.drawImage(PDFStyle.PATH_PLUME_TEXTURE, 0, 0, width=6*cm, height=6*cm, mask='auto', preserveAspectRatio=True, anchor='ne')
-        c.restoreState()
-
-        # Bottom Left
-        c.saveState()
-        c.translate(0, 0)
-        c.rotate(10)
-        c.drawImage(PDFStyle.PATH_PLUME_TEXTURE, -2*cm, -1*cm, width=8*cm, height=8*cm, mask='auto', preserveAspectRatio=True)
-        c.restoreState()
-
-    c.showPage()
+    create_standard_summary_page(c, "0", "AU PROGRAMME", intro_txt, steps)
 
 def create_editorial_page_card(c):
     """Page: Édito avec carte."""
@@ -313,18 +229,15 @@ def create_form_page_card(c):
     draw_page_background(c, width, height)
     
     card_margin = 2*cm
-    # card_width = width - 2*card_margin
-    # card_height = height - 5*cm
-    # card_y = 2*cm
     draw_side_panel(c, card_margin, width, height)
 
-    text_x = card_margin + 2*cm
-    text_top = height - 4*cm
+    text_x = card_margin + 1.0*cm
+    text_top = height - 4.0*cm
     
     draw_title(c, "Mon Engagement", text_x, text_top)
 
     form = c.acroForm
-    start_y = text_top - 2*cm
+    start_y = text_top - 1.5*cm
     
     c.setFont(PDFStyle.FONT_BODY, 12)
     c.setFillColor(PDFStyle.COLOR_TEXT_MAIN)
@@ -450,7 +363,6 @@ def create_faire_le_point_pages(c):
     Faire le Point : Ma Situation Actuelle.
     Split into 2 pages (4 questions each).
     """
-    width, height = A4
     questions_part1 = [
         ("Comment je me sens actuellement ?", "feeling"),
         ("Quel a été le déclencheur de ce bilan ?", "trigger"),
@@ -468,52 +380,15 @@ def create_faire_le_point_pages(c):
     parts = [(questions_part1, "1/2"), (questions_part2, "2/2")]
     
     for idx_part, (questions, part_label) in enumerate(parts):
-        draw_page_background(c, width, height)
-        
-        # Side Panel (Full Height)
-        card_margin = 2*cm
-        card_width = width - 2*card_margin
-        draw_side_panel(c, card_margin, width, height)
-        
-        text_x = card_margin + 1*cm
-        text_top = height - 3.5*cm
-        
-        draw_title(c, f"Faire le Point : Ma Situation ({part_label})", text_x, text_top, size=20)
+        layout = ExercisePageLayout(c, f"Faire le Point : Ma Situation ({part_label})", part_title="1. FAIRE LE POINT")
         
         if idx_part == 0:
-            c.setFont(PDFStyle.FONT_BODY, 10)
-            c.setFillColor(PDFStyle.COLOR_ACCENT_RED)
-            c.drawString(text_x, text_top - 0.7*cm, "Le début d’un bilan, c’est le bon moment pour enclencher le bouton PAUSE.")
-            start_y = text_top - 2*cm
-        else:
-            start_y = text_top - 1.5*cm
+            layout.add_intro_text("Le début d’un bilan, c’est le bon moment pour enclencher le bouton PAUSE.", style_choice="italic")
             
-        # Draw Questions
-        form = c.acroForm
-        field_height = 4.5*cm 
-        gap = 0.8*cm
-        
-        current_y = start_y
-        
-        c.setFont(PDFStyle.FONT_SUBTITLE, 11)
-        c.setFillColor(PDFStyle.COLOR_ACCENT_BLUE)
-
         for question, key in questions:
-            # Label
-            c.drawString(text_x, current_y, question)
-            
-            # Field position
-            mid_y = current_y - field_height - 0.5*cm
-            
-            create_input_field(form, f's1_point_{key}',
-                               x=text_x, y=mid_y,
-                               width=width - text_x - 1.5*cm, height=field_height,
-                               tooltip=question, multiline=True)
-                           
-            current_y -= (field_height + gap + 0.5*cm)
+            layout.add_question_block(question, f's1_point_{key}', box_height=3.5*cm)
 
-        draw_page_decorations(c, width, height, part_title="1. FAIRE LE POINT", x_offset=card_margin)
-        c.showPage()
+        layout.render()
 
 def create_domaines_de_vie_page(c):
     """
@@ -524,14 +399,12 @@ def create_domaines_de_vie_page(c):
     
     draw_page_background(c, width, height)
     
-    # Card
     card_margin = 2*cm
-    card_width = width - 2*card_margin
     draw_side_panel(c, card_margin, width, height)
 
     # Content
-    text_x = card_margin + 1*cm
-    text_top = height - 3.5*cm
+    text_x = card_margin + 1.0*cm
+    text_top = height - 4.0*cm
     
     draw_title(c, "Les Domaines de Vie", text_x, text_top, size=22)
     
@@ -647,29 +520,7 @@ def create_entourage_page(c):
     Mon Entourage.
     Soutiens vs Freins split.
     """
-    width, height = A4
-    
-    draw_page_background(c, width, height)
-    
-    # Side Panel (Full Height)
-    card_margin = 2*cm
-    card_width = width - 2*card_margin
-    draw_side_panel(c, card_margin, width, height)
-
-    text_x = card_margin + 1*cm
-    text_top = height - 3.5*cm
-    
-    draw_title(c, "Mon Entourage", text_x, text_top, size=22)
-    
-    # Intro Text (Psycho-education)
-    style_intro = ParagraphStyle(
-        'EntourageIntro',
-        fontName=PDFStyle.FONT_BODY,
-        fontSize=11,
-        leading=14,
-        textColor=PDFStyle.COLOR_TEXT_MAIN,
-        alignment=TA_JUSTIFY
-    )
+    layout = ExercisePageLayout(c, "Mon Entourage", part_title="1. FAIRE LE POINT")
     
     intro_txt = (
         "Le projet que vous menez ne se fait pas en vase clos. Votre entourage, "
@@ -677,42 +528,17 @@ def create_entourage_page(c):
         "cheminement. Identifier vos alliés et les sources de tensions possibles "
         "est une étape importante pour sécuriser votre parcours."
     )
+    layout.add_intro_text(intro_txt)
     
-    p_intro = Paragraph(intro_txt, style_intro)
-    w_i, h_i = p_intro.wrap(width - text_x - 1*cm, height)
-    p_intro.drawOn(c, text_x, text_top - 1.2*cm - h_i)
-
-    # Calculate Areas
-    available_top = text_top - 1.5*cm - h_i - 0.5*cm
-    available_bottom = 2.5*cm
-    panel_height = available_top - available_bottom
-    half_height = panel_height / 2
+    # Needs two big areas: Soutiens (Blue) and Freins (Red)
+    # The layout.add_question_block handles the alternate colors internally!
     
-    form = c.acroForm
-    
-    # Section 1: Soutiens
-    y_soutiens = available_top
-    draw_title(c, "Soutien, conseil en positif", text_x, y_soutiens, size=14, color=PDFStyle.COLOR_SUCCESS)
-    c.setFont(PDFStyle.FONT_BODY, 9)
-    c.setFillColor(PDFStyle.COLOR_TEXT_MAIN)
-    c.drawString(text_x, y_soutiens - 0.5*cm, "Qui peut vous soutenir ou vous conseiller utilement dans cette démarche ?")
+    layout.add_question_block("Soutien, conseil en positif", "s1_entourage_soutiens", 
+                              subtitle="Qui peut vous soutenir ou vous conseiller utilement dans cette démarche ?", 
+                              box_height=7.5*cm)
+                              
+    layout.add_question_block("Regard négatif ou anxiété des proches", "s1_entourage_freins", 
+                              subtitle="Qui pourrait exprimer des doutes, des craintes ou un regard critique ?", 
+                              box_height=7.5*cm)
 
-    create_input_field(form, 's1_entourage_soutiens',
-                       x=text_x, y=y_soutiens - half_height + 0.8*cm,
-                       width=width - text_x - 1*cm, height=half_height - 1.5*cm,
-                       tooltip='Vos soutiens', multiline=True)
-                   
-    # Section 2: Freins
-    y_freins = y_soutiens - half_height 
-    draw_title(c, "Regard négatif ou anxiété des proches", text_x, y_freins, size=14, color=PDFStyle.COLOR_ACCENT_RED)
-    c.setFont(PDFStyle.FONT_BODY, 9)
-    c.setFillColor(PDFStyle.COLOR_TEXT_MAIN)
-    c.drawString(text_x, y_freins - 0.5*cm, "Qui pourrait exprimer des doutes, des craintes ou un regard critique ?")
-
-    create_input_field(form, 's1_entourage_freins',
-                       x=text_x, y=y_freins - half_height + 0.8*cm,
-                       width=width - text_x - 1*cm, height=half_height - 1.5*cm,
-                       tooltip='Vos freins', multiline=True)
-
-    draw_page_decorations(c, width, height, part_title="1. FAIRE LE POINT", x_offset=card_margin)
-    c.showPage()
+    layout.render()

@@ -72,3 +72,6 @@ Si Entourage = "Pas au courant" : C'est un point de vigilance majeur à traiter 
 Si Attentes = "Valider un projet précis" : Le bilan sera très "terrain" (Formule courte adaptée).
 Si Attentes = "Perdu complet" : Besoin de beaucoup d'introspection (Formule longue conseillée).
 
+Analyse la structure des génération des différents workbook de façon a identifier les bloc atomiques nécessaires pour garantir un harmonie de l'UI (espacement horzontal vertical, taille variée des objetcs etc...
+
+tous les workbooks doivent être généré de la même façon avec les même bloc atomiques page de couverture, sommaire, engagements, recapitulatif séance précédente, exercices, page de garde . quels sont les points communs, différences entre les 3 workbooks existant, et quelle es tla séquence type à inférer.

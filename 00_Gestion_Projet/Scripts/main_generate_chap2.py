@@ -33,11 +33,11 @@ def generate_workbook_chap2():
     print("Generating Cover...")
     chap2.create_chap2_cover(c)
 
-    print("Generating Psycho-Education Pages...")
-    chap2.create_psycho_edu_pages(c)
-    
-    print("Generating Work Image Page...")
-    chap2.create_work_image_page(c)
+    print("Generating Concept Page...")
+    chap2.create_concept_page(c)
+
+    print("Generating Récapitulatif Page...")
+    chap2.create_recap_seance_page(c)
     
     print("Generating Analysis Parcours Pages...")
     chap2.create_analysis_parcours_pages(c)
@@ -48,14 +48,8 @@ def generate_workbook_chap2():
     print("Generating Skills Transfer Page...")
     chap2.create_skills_transfer_page(c)
     
-    print("Generating Heritage Page (Genogramme)...")
-    chap2.create_heritage_page(c)
-    
     print("Generating Tree of Life Page...")
     chap2.create_tree_of_life_page(c)
-    
-    print("Generating Mentors Page...")
-    chap2.create_mentors_page(c)
 
     print("Generating End Page...")
     create_closing_page(c)

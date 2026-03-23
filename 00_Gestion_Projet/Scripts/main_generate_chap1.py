@@ -16,7 +16,7 @@ from workbook_generator.chapters.chap1 import (
 )
 
 def create_chap1_main_cover(c):
-    create_standard_cover(c, "WORKBOOK : CHAPITRE 1")
+    create_standard_cover(c, "Chapitre 1 : Mes héritages")
 
 def build_wb_chap1_pdf(output_filename):
     # Register fonts first

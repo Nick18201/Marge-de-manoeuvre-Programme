@@ -9,7 +9,9 @@ from ..config import PDFStyle
 from ..components import (
     draw_page_background, draw_dot_grid, draw_card, draw_side_panel, 
     draw_leaf, draw_title, draw_branding_logo, create_standard_cover,
-    draw_circular_stamp, draw_pause_badge, draw_page_decorations
+    draw_circular_stamp, draw_pause_badge, draw_page_decorations,
+    create_standard_engagement_page, create_standard_summary_page, 
+    ExercisePageLayout
 )
 from ..forms import create_input_field, create_checkbox
 
@@ -24,73 +26,13 @@ def create_engagement_page(c):
     Page 1: Mon Engagement.
     Text heavy page with signature.
     """
-    width, height = A4
-    draw_page_background(c, width, height)
-    
-    # Side Panel (Full Height)
-    card_margin = 2*cm
-    draw_side_panel(c, card_margin, width, height)
-
-    text_x = card_margin + 1*cm
-    text_top = height - 6.5*cm
-    
-    draw_title(c, "Mon Engagement", text_x, text_top)
-    
-    # Body
-    text_y = text_top - 2*cm
-    c.setFont(PDFStyle.FONT_BODY, 11)
-    c.setFillColor(PDFStyle.COLOR_TEXT_MAIN)
-    
-    lines = [
-        "Je m'engage aujourd'hui à prendre ce temps pour moi.",
-        "À regarder ma situation avec honnêteté et bienveillance.",
-        "À accepter de ne pas avoir toutes les réponses tout de suite.",
-        "À explorer, tester, et avancer pas à pas.",
-        "",
-        "Ce travail est pour moi, et je décide de m'y investir pleinement."
-    ]
-    
-    for line in lines:
-        c.drawString(text_x, text_y, line)
-        text_y -= 18
-
-    # Signature Area
-    sig_y = text_y - 4*cm
-    c.drawString(text_x, sig_y + 2*cm, "Date et Signature :")
-    
-    # Signature Box
-    form = c.acroForm
-    create_input_field(form, 'signature_engagement',
-                       x=text_x, y=sig_y, width=10*cm, height=1.5*cm,
-                       tooltip='Votre Signature')
-                       
-    draw_page_decorations(c, width, height, part_title="mon engagement", x_offset=card_margin)
-    c.showPage()
+    create_standard_engagement_page(c, "1. MON ENGAGEMENT")
 
 def create_concept_page(c):
     """
     Page 2: Chapter Cover - 1. Concept
     Blue background, large watermark.
     """
-    width, height = A4
-    
-    c.setFillColor(PDFStyle.COLOR_ACCENT_BLUE)
-    c.rect(0, 0, width, height, fill=1, stroke=0)
-    
-    # Faint Grid
-    draw_dot_grid(c, width, height, color=PDFStyle.COLOR_WHITE, opacity=0.1)
-
-    c.saveState()
-    c.setFont(PDFStyle.FONT_BRANDING, 160) 
-    c.setFillColor(PDFStyle.COLOR_WHITE, alpha=0.12)
-    c.drawString(1.5*cm, height - 9*cm, "1.")
-    c.restoreState()
-
-    start_y = height - 10*cm
-    c.setFont(PDFStyle.FONT_BRANDING, 32)
-    c.setFillColor(PDFStyle.COLOR_WHITE)
-    c.drawString(2.5*cm, start_y, "Concept")
-    
     # Points
     points = [
         ("Sommaire :", ""),
@@ -104,28 +46,7 @@ def create_concept_page(c):
         ("8.", "Mentors & Anti-Modèles")
     ]
     
-    text_y = start_y - 3*cm
-    c.setFont(PDFStyle.FONT_BODY, 14)
-    
-    for label, desc in points:
-        c.setFont(PDFStyle.FONT_TITLE, 14)
-        c.drawString(2.5*cm, text_y, label)
-        
-        c.setFont(PDFStyle.FONT_BODY, 14)
-        label_width = c.stringWidth(label, PDFStyle.FONT_TITLE, 14)
-        c.drawString(2.5*cm + label_width + 10, text_y, desc)
-        
-        text_y -= 1.0*cm
-
-    # Decor (Plume)
-    if os.path.exists(PDFStyle.PATH_PLUME_TEXTURE):
-        c.saveState()
-        c.translate(width - 1*cm, height - 3*cm)
-        c.rotate(30)
-        c.drawImage(PDFStyle.PATH_PLUME_TEXTURE, 0, 0, width=5*cm, height=5*cm, mask='auto', preserveAspectRatio=True, anchor='ne')
-        c.restoreState()
-
-    c.showPage()
+    create_standard_summary_page(c, "1", "CONCEPT", "", points)
 
 def create_meteo_page(c):
     """
@@ -137,8 +58,8 @@ def create_meteo_page(c):
     card_margin = 2*cm
     draw_side_panel(c, card_margin, width, height)
 
-    text_x = card_margin + 1*cm
-    text_top = height - 6.5*cm
+    text_x = card_margin + 1.0*cm
+    text_top = height - 4.0*cm
     
     draw_title(c, "Mon État d'Esprit Actuel", text_x, text_top)
     
@@ -216,16 +137,18 @@ def create_vision_page(c):
     draw_side_panel(c, card_margin, width, height)
 
     # Title
-    draw_title(c, "Ma Vision 360°", card_margin + 1*cm, height - 5*cm)
+    text_x = card_margin + 1.0*cm
+    text_top = height - 4.0*cm
+    draw_title(c, "Ma Vision 360°", text_x, text_top)
     
     # Instruction
     c.setFont(PDFStyle.FONT_BODY, 11)
     c.setFillColor(PDFStyle.COLOR_TEXT_MAIN)
-    c.drawString(card_margin + 1*cm, height - 6*cm, "Instruction : Pour chaque domaine, écrivez une phrase de synthèse sur votre aspiration.")
+    c.drawString(text_x, text_top - 0.7*cm, "Instruction : Pour chaque domaine, écrivez une phrase de synthèse sur votre aspiration.")
 
     # Center (Relative to panel)
     center_x = card_margin + (width - card_margin) / 2
-    center_y = height / 2 - 1*cm
+    center_y = height / 2 - 2.5*cm
     
     # Draw Axes
     c.setLineWidth(1)
@@ -320,8 +243,8 @@ def create_boussole_page(c):
     card_margin = 2*cm
     draw_side_panel(c, card_margin, width, height)
 
-    text_x = card_margin + 1.5*cm
-    text_top = height - 5*cm
+    text_x = card_margin + 1.0*cm
+    text_top = height - 4.0*cm
     
     draw_title(c, "Mon Objectif Boussole", text_x, text_top)
     
@@ -330,16 +253,16 @@ def create_boussole_page(c):
     # Visual Compass (Placeholder Circle)
     c.setStrokeColor(PDFStyle.COLOR_ACCENT_RED)
     c.setLineWidth(3)
-    c.circle(width/2, text_top - 3*cm, 1.5*cm, fill=0, stroke=1)
+    c.circle(width/2, text_top - 2.5*cm, 1.5*cm, fill=0, stroke=1)
     # North mark
     c.setFont(PDFStyle.FONT_BRANDING, 20)
     c.setFillColor(PDFStyle.COLOR_ACCENT_RED)
-    c.drawCentredString(width/2, text_top - 3*cm + 0.8*cm, "N")
+    c.drawCentredString(width/2, text_top - 2.5*cm + 0.8*cm, "N")
 
     # Main Goal Structure
     # "D'ici 3 mois, je veux avoir clarifié [Enjeu principal] pour pouvoir [Bénéfice concret]."
     
-    y_goal = text_top - 6*cm
+    y_goal = text_top - 5.5*cm
     c.setFont(PDFStyle.FONT_SUBTITLE, 13)
     c.setFillColor(PDFStyle.COLOR_TEXT_MAIN)
     c.drawString(text_x, y_goal, "D'ici 3 mois, je veux avoir clarifié :")
@@ -374,115 +297,43 @@ def create_sac_a_dos_page(c):
     Page 6: Le Sac à Dos.
     Specific prompts from Markdown.
     """
-    width, height = A4
-    draw_page_background(c, width, height)
+    layout = ExercisePageLayout(c, "Ce que je dépose aujourd'hui", part_title="1. Récapitulatif de la séance précédente")
+    layout.add_intro_text("Allégeons le sac à dos. Je décide de déposer :")
     
-    card_margin = 2*cm
-    draw_side_panel(c, card_margin, width, height)
+    layout.add_question_block("Je lâche cette croyance :", "sac_croyance", box_height=2.5*cm)
+    layout.add_question_block("Je ne veux plus subir :", "sac_subir", box_height=2.5*cm)
+    layout.add_question_block("Ma plus grande peur est :", "sac_peur", box_height=2.5*cm)
+    
+    layout.add_intro_text("...et je décide de la regarder en face.", style_choice="italic")
 
-    text_x = card_margin + 1.5*cm
-    text_top = height - 5.5*cm
-    
-    draw_title(c, "Ce que je dépose aujourd'hui", text_x, text_top)
-    c.setFont(PDFStyle.FONT_BODY, 11)
-    c.setFillColor(PDFStyle.COLOR_TEXT_MAIN)
-    c.drawString(text_x, text_top - 0.7*cm, "Allégeons le sac à dos. Je décide de déposer :")
-    
-    form = c.acroForm
-    start_y = text_top - 3*cm
-    
-    c.setFont(PDFStyle.FONT_SUBTITLE, 12)
-    c.setFillColor(PDFStyle.COLOR_ACCENT_BLUE) # Requested Blue
-    c.drawString(text_x, start_y, "Je lâche cette croyance :")
-    create_input_field(form, 'sac_croyance',
-                       x=text_x, y=start_y - 1.5*cm,
-                       width=width - text_x - 1*cm, height=1.2*cm,
-                       tooltip='Croyance à lâcher', multiline=True)
-    
-    start_y -= 2.5*cm
-    c.setFillColor(PDFStyle.COLOR_ACCENT_BLUE) # Requested Blue
-    c.drawString(text_x, start_y, "Je ne veux plus subir :")
-    create_input_field(form, 'sac_subir',
-                       x=text_x, y=start_y - 1.5*cm,
-                       width=width - text_x - 1*cm, height=1.2*cm,
-                       tooltip='Situation à ne plus subir', multiline=True)
-
-    start_y -= 2.5*cm
-    c.setFillColor(PDFStyle.COLOR_ACCENT_BLUE) # Requested Blue
-    c.drawString(text_x, start_y, "Ma plus grande peur est :")
-    create_input_field(form, 'sac_peur',
-                       x=text_x, y=start_y - 1.5*cm,
-                       width=width - text_x - 1*cm, height=1.2*cm,
-                       tooltip='Votre peur', multiline=True)
-                       
-    c.setFont(PDFStyle.FONT_ITALIC, 11)
-    c.setFillColor(PDFStyle.COLOR_TEXT_MAIN) # Reset to black/main for body
-    c.drawString(text_x, start_y - 2.2*cm, "...et je décide de la regarder en face.")
-
-    draw_page_decorations(c, width, height, part_title="1. Récapitulatif de la séance précédente", x_offset=card_margin)
-    c.showPage()
+    layout.render()
 
 def create_heritage_page(c):
     """
     Page: Mon Héritage (3FVS - Genogramme Simplifié).
     Focus: Transmissions, Loyautés, Mandats.
     """
-    width, height = A4
-    draw_page_background(c, width, height)
-    card_margin = 2*cm
-    draw_side_panel(c, card_margin, width, height)
-    draw_title(c, "Mon Héritage (Matrice 3FVS)", card_margin + 0.5*cm, height - 5*cm)
+    layout = ExercisePageLayout(c, "Mon Héritage (Matrice 3FVS)", part_title="2. Mes héritages")
+    layout.add_intro_text("Identifiez ce que vous avez reçu pour décider de ce que vous en faites.")
     
-    c.setFont(PDFStyle.FONT_BODY, 11)
-    c.setFillColor(PDFStyle.COLOR_TEXT_MAIN)
-    c.drawString(card_margin + 0.5*cm, height - 6*cm, "Identifiez ce que vous avez reçu pour décider de ce que vous en faites.")
-
-    form = c.acroForm
-    
-    # BOXES LAYOUT
-    text_x = card_margin + 0.5*cm
-    box_w = width - text_x - 1*cm
-    box_h = 3*cm
-    y_cursor = height - 7.5*cm
-    
-    c.setFont(PDFStyle.FONT_SUBTITLE, 12)
-    c.setFillColor(PDFStyle.COLOR_ACCENT_BLUE)
-    c.drawString(text_x, y_cursor, "1. FORCES (Ce que je garde / Résilience)")
-    
-    c.setFont(PDFStyle.FONT_BODY, 10)
-    c.setFillColor(PDFStyle.COLOR_TEXT_SECONDARY)
-    c.drawString(text_x, y_cursor - 0.5*cm, "Quelles qualités, valeurs ou savoir-faire de ma famille sont des atouts pour moi ?")
-    
-    create_input_field(form, 'heritage_forces', x=text_x, y=y_cursor - 4*cm, width=box_w, height=3*cm, multiline=True)
-    
-    y_cursor -= 6*cm
-    c.setFont(PDFStyle.FONT_SUBTITLE, 12)
-    c.setFillColor(PDFStyle.COLOR_ACCENT_RED)
-    c.drawString(text_x, y_cursor, "2. VIGILANCES (Ce que je laisse / Schémas)")
-    
-    c.setFont(PDFStyle.FONT_BODY, 10)
-    c.setFillColor(PDFStyle.COLOR_TEXT_SECONDARY)
-    c.drawString(text_x, y_cursor - 0.5*cm, "Quels comportements ou croyances limitantes je décide de ne pas reproduire ?")
-    
-    create_input_field(form, 'heritage_vigilances', x=text_x, y=y_cursor - 4*cm, width=box_w, height=3*cm, multiline=True)
-    
-    y_cursor -= 6*cm
-    c.setFont(PDFStyle.FONT_SUBTITLE, 12)
-    c.setFillColor(PDFStyle.COLOR_TEXT_MAIN)
-    c.drawString(text_x, y_cursor, "3. SOUHAITS & COMPTES (Mandats Familiaux)")
-    
-    c.setFont(PDFStyle.FONT_BODY, 10)
-    c.setFillColor(PDFStyle.COLOR_TEXT_SECONDARY)
-    c.drawString(text_x, y_cursor - 0.5*cm, "Qu'est-ce qu'on voulait pour moi ? A qui ai-je l'impression de devoir quelque chose ?")
-    
-    create_input_field(form, 'heritage_souhaits', x=text_x, y=y_cursor - 4*cm, width=box_w, height=3*cm, multiline=True)
+    layout.add_question_block("1. FORCES (Ce que je garde / Résilience)", "heritage_forces", 
+                              subtitle="Quelles qualités, valeurs ou savoir-faire de ma famille sont des atouts ?", 
+                              box_height=3.5*cm)
+                              
+    layout.add_question_block("2. VIGILANCES (Ce que je laisse / Schémas)", "heritage_vigilances", 
+                              subtitle="Quels comportements ou croyances limitantes je décide de ne pas reproduire ?", 
+                              box_height=3.5*cm)
+                              
+    layout.add_question_block("3. SOUHAITS & COMPTES (Mandats Familiaux)", "heritage_souhaits", 
+                              subtitle="Qu'est-ce qu'on voulait pour moi ? A qui ai-je l'impression de devoir quelque chose ?", 
+                              box_height=3.5*cm)
 
     # Note bas de page
     c.setFont(PDFStyle.FONT_ITALIC, 10)
-    c.drawCentredString(width/2, 2*cm, "On ne trahit pas ses origines en choisissant sa propre voie. On les honore différemment.")
+    c.setFillColor(PDFStyle.COLOR_TEXT_MAIN)
+    c.drawCentredString(A4[0]/2, 2*cm, "On ne trahit pas ses origines en choisissant sa propre voie. On les honore différemment.")
 
-    draw_page_decorations(c, width, height, part_title="2. Mes héritages", x_offset=card_margin)
-    c.showPage()
+    layout.render()
 
 def create_work_image_page(c):
     """
@@ -493,39 +344,40 @@ def create_work_image_page(c):
     draw_page_background(c, width, height)
     card_margin = 2*cm
     draw_side_panel(c, card_margin, width, height)
-    draw_title(c, "Image du Monde du Travail", card_margin + 0.5*cm, height - 5*cm)
+    
+    text_x = card_margin + 1.0*cm
+    draw_title(c, "Image du Monde du Travail", text_x, height - 4.0*cm)
 
     form = c.acroForm
-    y_cursor = height - 6.5*cm
-    text_x = card_margin + 0.5*cm
+    y_cursor = height - 5.5*cm
 
     c.setFont(PDFStyle.FONT_SUBTITLE, 12)
     c.setFillColor(PDFStyle.COLOR_ACCENT_BLUE)
     c.drawString(text_x, y_cursor, "1. Exploration Sensorielle & Emotionnelle")
     
-    y_cursor -= 1*cm
+    y_cursor -= 0.8*cm
     c.setFont(PDFStyle.FONT_BODY, 10)
     c.setFillColor(PDFStyle.COLOR_TEXT_MAIN)
     c.drawString(text_x, y_cursor, "Fermez les yeux. Visualisez le lieu de travail de vos parents (ou figures parentales).")
     y_cursor -= 0.5*cm
     c.drawString(text_x, y_cursor, "Quelles sont les odeurs ? Les bruits ? La lumière ? L'ambiance générale ?")
     
-    y_cursor -= 3*cm
+    y_cursor -= 2.6*cm
     create_input_field(form, 'image_sensorielle', 
                        x=text_x, y=y_cursor, 
-                       width=width - text_x - 1.5*cm, height=2.5*cm, 
+                       width=width - text_x - 1.5*cm, height=2.2*cm, 
                        multiline=True, tooltip="Décrivez l'ambiance sensorielle du travail de vos parents...")
     
-    y_cursor -= 1.5*cm
+    y_cursor -= 1.2*cm
     c.setFont(PDFStyle.FONT_SUBTITLE, 12)
     c.setFillColor(PDFStyle.COLOR_ACCENT_RED)
     c.drawString(text_x, y_cursor, "2. L'Héritage Familial")
     
     questions = [
-        ("Quel était le travail de vos parents / grands-parents ?", "image_metiers", 1.5*cm),
-        ("Quelle était leur relation au travail ? (Plaisir, Souffrance, Ennui...)", "image_relation", 1.5*cm),
-        ("Comment leur travail influençait-il la vie de famille ? (Stress, Absences, Argent...)", "image_impact_famille", 1.5*cm),
-        ("Comment ont-ils influencé vos choix ? (Encouragements, Dissuasions...)", "image_influence_choix", 1.5*cm)
+        ("Quel était le travail de vos parents / grands-parents ?", "image_metiers", 1.2*cm),
+        ("Quelle était leur relation au travail ? (Plaisir, Souffrance, Ennui...)", "image_relation", 1.2*cm),
+        ("Comment leur travail influençait-il la vie de famille ? (Stress, Absences, Argent...)", "image_impact_famille", 1.2*cm),
+        ("Comment ont-ils influencé vos choix ? (Encouragements, Dissuasions...)", "image_influence_choix", 1.2*cm)
     ]
 
     y_cursor -= 0.8*cm
@@ -538,24 +390,24 @@ def create_work_image_page(c):
         y_cursor -= 0.6*cm
 
     # Split into 2 columns
-    y_cursor -= 1*cm
+    y_cursor -= 0.8*cm
     c.setFont(PDFStyle.FONT_SUBTITLE, 12)
     c.setFillColor(PDFStyle.COLOR_ACCENT_BLUE)
     c.drawString(text_x, y_cursor + 0.5*cm, "3. Changer de Regard")
 
-    col_width = (width - text_x - 2*cm) / 2
+    col_width = (width - text_x - 1.5*cm) / 2 - 0.5*cm
     
     # Col 1: Avant
     c.setFont(PDFStyle.FONT_ITALIC, 10)
     c.setFillColor(PDFStyle.COLOR_ACCENT_BLUE)
     c.drawString(text_x, y_cursor, "5 Mots associés au travail (Héritage) :")
-    create_input_field(form, 'image_mots_heritage', x=text_x, y=y_cursor - 3*cm, width=col_width, height=2.8*cm, multiline=True)
+    create_input_field(form, 'image_mots_heritage', x=text_x, y=y_cursor - 2.5*cm, width=col_width, height=2.2*cm, multiline=True)
 
-    # Col 2: Futur
+    # Col 2: Futur  
     right_col_x = text_x + col_width + 1*cm
-    c.setFillColor(PDFStyle.COLOR_ACCENT_BLUE)
+    c.setFillColor(PDFStyle.COLOR_ACCENT_RED) # alternating visual!
     c.drawString(right_col_x, y_cursor, "5 Mots pour mon futur travail (Désir) :")
-    create_input_field(form, 'image_mots_futur', x=right_col_x, y=y_cursor - 3*cm, width=col_width, height=2.8*cm, multiline=True)
+    create_input_field(form, 'image_mots_futur', x=right_col_x, y=y_cursor - 2.5*cm, width=col_width, height=2.2*cm, multiline=True)
 
     draw_page_decorations(c, width, height, part_title="2. Mes héritages", x_offset=card_margin)
     c.showPage()
@@ -564,43 +416,13 @@ def create_mentors_page(c):
     """
     Page: Mentors & Anti-Modèles.
     """
-    width, height = A4
-    draw_page_background(c, width, height)
-    card_margin = 2*cm
-    draw_side_panel(c, card_margin, width, height)
-    draw_title(c, "Mentors & Anti-Modèles", card_margin + 0.5*cm, height - 5*cm)
-
-    y_start = height - 6.5*cm
-    text_x = card_margin + 0.5*cm
-
-    c.setFont(PDFStyle.FONT_SUBTITLE, 14)
-    c.setFillColor(PDFStyle.COLOR_ACCENT_BLUE)
-    c.drawString(text_x, y_start, "Mes Mentors (Inspirations)")
+    layout = ExercisePageLayout(c, "Mentors & Anti-Modèles", part_title="2. Mes héritages")
+    layout.add_question_block("Mes Mentors (Inspirations)", "mentors_positif", 
+                              subtitle="Qui est votre héros professionnel (réel ou fictif) et pourquoi ? (J'admire X pour...)", 
+                              box_height=6.0*cm)
+                              
+    layout.add_question_block("Mes Anti-Modèles (Repoussoirs)", "mentors_negatif", 
+                              subtitle="Quels sont les comportements ou situations que vous refusez de reproduire ? (Je ne veux pas reproduire...)", 
+                              box_height=6.0*cm)
     
-    c.setFont(PDFStyle.FONT_BODY, 11)
-    c.setFillColor(PDFStyle.COLOR_TEXT_MAIN)
-    c.drawString(text_x, y_start - 0.7*cm, "Qui est votre héros professionnel (réel ou fictif) et pourquoi ?")
-    
-    form = c.acroForm
-    create_input_field(form, 'mentors_positif', 
-                       x=text_x, y=y_start - 6*cm, 
-                       width=width - text_x - 1.5*cm, height=5*cm, 
-                       multiline=True, tooltip="J'admire X pour...")
-
-    y_anti = y_start - 7.5*cm
-    c.setFont(PDFStyle.FONT_SUBTITLE, 14)
-    c.setFillColor(PDFStyle.COLOR_ACCENT_RED)
-    c.drawString(text_x, y_anti, "Mes Anti-Modèles (Repoussoirs)")
-    
-    c.setFont(PDFStyle.FONT_BODY, 11)
-    c.setFillColor(PDFStyle.COLOR_TEXT_MAIN)
-    c.drawString(text_x, y_anti - 0.7*cm, "Identifiez des comportements ou situations que vous refusez de reproduire.")
-    c.drawString(text_x, y_anti - 1.2*cm, "Cela ne signifie pas rejeter la personne entière, mais trier l'héritage.")
-    
-    create_input_field(form, 'mentors_negatif', 
-                       x=text_x, y=y_anti - 6.5*cm, 
-                       width=width - text_x - 1.5*cm, height=5*cm, 
-                       multiline=True, tooltip="Je ne veux pas reproduire...")
-                       
-    draw_page_decorations(c, width, height, part_title="2. Mes héritages", x_offset=card_margin)
-    c.showPage()
+    layout.render()
