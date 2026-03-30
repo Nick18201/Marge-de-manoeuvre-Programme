@@ -20,9 +20,10 @@ Les fichiers et dossiers doivent être organisés rigoureusement dans les dossie
 
 ## 2. Emplacement et Nommage des Scripts Python
 
-- **Scripts de génération de Workbooks** : Ils doivent être nommés selon la convention `generate_workbook_chapX_final.py` (où `X` est le numéro du chapitre).
-- **Emplacement** : Ces scripts doivent être documentés et positionnés logiquement, généralement près des dossiers de conception (`02_Phase_Investigation_Introspection` pour le Chapitre 2, etc.) ou à la racine du projet si le contexte l'exige.
-- **Ressources (Images/Logos)** : Les ressources visuelles nécessaires à la génération (ex. le logo) doivent être appelées de manière robuste via des chemins relatifs ou absolus fiables.
+- **Emplacement Centralisé** : Tous les scripts Python liés à la génération des Workbooks sont centralisés dans le dossier `00_Gestion_Projet/Scripts/`. 
+- **Point d'Entrée (Entry Points)** : Les scripts principaux d'exécution doivent être nommés selon la convention `main_generate_chapX.py` (où `X` est le numéro du chapitre).
+- **Package `workbook_generator`** : Toute la logique de conception PDF, les composants graphiques et les configurations doivent se trouver dans le package central `00_Gestion_Projet/Scripts/workbook_generator/`.
+- **Ressources (Images/Logos)** : Les ressources visuelles nécessaires à la génération (ex. le logo) doivent être appelées de manière robuste via des chemins définis dans la configuration du générateur.
 
 ## Quand utiliser cette compétence
 

@@ -5,25 +5,26 @@ description: Architecture et bonnes pratiques de codage pour les scripts Python 
 
 # Compétence : Architecture des Scripts Python de Workbooks
 
-Le projet génère des carnets de travail ("Workbooks") via un ensemble de scripts Python (généralement nommés `generate_workbook_chapX_final.py`). Pour s'assurer de la maintenabilité du code, respectez cette architecture.
+Le projet génère des carnets de travail ("Workbooks") via un ensemble de scripts Python modulaires centralisés dans `00_Gestion_Projet/Scripts/`. 
 
-## 1. Séparation des Préoccupations (Separation of Concerns)
+L'architecture est centralisée autour d'un package Python `workbook_generator` qui rassemble les responsabilités pour garantir une haute maintenabilité.
 
-- **Le Contenu (Data / Text)** : Séparez au maximum les textes liés à la "psycho-éducation" (consignes, textes explicatifs, titres) de la logique de rendu PDF. Stockez les textes dans des dictionnaires ou de grands blocs constants au début du script ou dans un fichier de configuration/module séparé.
-- **La Logique de Rendu (Rendering Logic)** : Concentrez le dessin du PDF dans des fonctions dédiées (ex. `draw_header()`, `draw_exercise_arbre_de_vie()`). Ces fonctions doivent accepter les données/textes en tant paramètres.
+## 1. L'Architecture Modulaire `workbook_generator`
 
-## 2. Gestion de la Mise en Page et Variables Globales
+- **Scripts Principaux (`main_generate_chapX.py`)** : Ce sont les points d'entrée qui instancient le `canvas` principal de ReportLab. Ils importent et appellent successivement les méthodes de génération de pages.
+- **Les Chapitres (`workbook_generator/chapters/`)** : Chaque chapitre dispose de son fichier spécifique (ex. `chap3.py`) qui rassemble la logique *spécifique* à ce chapitre (texte psycho-éducatif et appel des composants).
+- **Les Composants Réutilisables (`workbook_generator/components.py`)** : Regroupe les fonctions de dessin réutilisables (en-têtes, encadrés, bannières, exercices standards, pages de couverture ou de conclusion) qui s'appliquent potentiellement à plusieurs chapitres.
+- **Configuration Globale (`workbook_generator/config.py`)** : Remplace les variables globales ou les constantes éparpillées. Ce fichier définit systématiquement les propriétés de marge (`PDFStyle.MARGIN_LEFT`), les couleurs (`PDFStyle.COLORS.PRIMARY`), et les tailles de polices (`PDFStyle.FONTS.H1_SIZE`).
+- **Formulaires (`workbook_generator/forms.py`)** : Centralise la définition des champs textes (multilignes) ou autres éléments AcroForm interactifs.
+- **Utilitaires (`workbook_generator/utils.py`)** : Héberge les utilitaires globaux comme le `register_fonts()`.
 
-- Évitez les "nombres magiques" (magic numbers) éparpillés dans le code pour positionner visuellement les éléments avec Draw ou ReportLab.
-- Groupez les marges, l'espacement entre chapitres, les hauteurs et largeurs de cadre dans un dictionnaire de style ou un bloc de constantes (ex. `MARGIN_LEFT = 50`, `HEADER_Y_POS = 750`).
-- Mettez à profit les méthodes qui calculent automatiquement la hauteur des blocs de texte pour ajuster la position Y des éléments subséquents au lieu de la "deviner".
+## 2. Principes Directeurs de Conception (Design Guidelines)
 
-## 3. Gestion des Erreurs et Robustesse
-
-- Prévoyez des `try...except` pertinents en encapsulant les méthodes à risques (gestion d’imports de fonts ou le chargement d'images de police/logos).
-- Assurez-vous que les imports de `reportlab.pdfgen.canvas`, `reportlab.lib.colors`, et la gestion des formulaires AcroForm sont toujours appelés correctement selon la version de la bibliothèque installée.
+- **Zéro Magic Numbers** : Tout positionnement Y, toute taille, ou marge doit être déduit de `config.py` ou calculé dynamiquement grâce aux fonctions d'utilitaire texte/dessin (exposées dans `utils` ou `components`).
+- **Chaînage de la position Y** : Pratiquez la mise à jour continue d'une variable `current_y` ou le retour d'une position depuis chaque appel de fonction pour éviter les calculs figés.
 
 ## Quand utiliser cette compétence
 
-- Lors de la création d'un nouveau script `generate_workbook_chapX_final.py`.
-- Lors de la refactorisation d'un script long, monolithique ou causant des décalages dans le dessin de la page PDF.
+- Lors de la création d'un nouveau chapitre (`main_generate_chapX.py`).
+- Lors du déplacement de codes monolithiques vers l'architecture de composants.
+- Pour identifier où aller chercher ou placer un réglage visuel (dans `config.py`) ou un nouvel élément graphique (`components.py`).

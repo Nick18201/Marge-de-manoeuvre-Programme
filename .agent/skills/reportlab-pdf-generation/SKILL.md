@@ -11,21 +11,19 @@ Ce projet utilise massivement la bibliothèque `reportlab` pour créer des carne
 
 1. **Champs de Texte de Formulaire (AcroForm Text Fields)** :
    - Pour les champs où un bénéficiaire doit saisir de longues réponses, vous **devez** utiliser le support multiligne.
-   - Si les champs standards `textfield` ne supportent pas `multiline=True` par défaut dans votre version ReportLab, privilégiez d'autres moyens de le configurer (voir la documentation source de `reportlab.pdfgen.canvas.acroForm` pour la version installée). 
-   - Vous devez vous assurer que les barres de défilement (scrollbars) sont gérées proprement. 
-   - Renseignez une couleur de fond claire pour les champs visés, afin de d'indiquer clairement les espaces à remplir (ex: `#f8f9fa` ou la couleur spécifiée par l'utilisateur).
+   - Pour garantir un rendu systématiquement correct (multiline, couleurs, scrollbars), instanciez les champs _exclusivement_ via la fonction `create_form_textfield()` du fichier `workbook_generator/forms.py` plutôt que de manipuler directement l'API ReportLab.
 
 2. **Logo en bas de page** :
    - Chaque WorkBook généré doit intégrer une page de fin.
-   - Cette page finale comporte le logo "marge de manoeuvre" (se référer à la compétence mdm-branding pour la police Montserrat Black, souligné, texte rouge) et un message d'encouragement.
+   - Afin d'éviter la duplication de code, appelez la fonction générique `create_closing_page(c)` présente dans `workbook_generator/components.py`. (Se référer à la compétence `mdm-branding` pour les couleurs/polices globales).
 
 3. **Mise en page** :
    - Évitez les chevauchements entre les en-têtes (headers) et le corps du texte (ex. Arbre de Vie).
-   - Ajustez minutieusement les coordonnées X, Y pour les boîtes de texte pour une harmonie visuelle.
+   - Toute coordonnée X, Y ou dimension de boîte doit être calculée de façon paramétrique. Référez-vous systématiquement au dictionnaire `PDFStyle` dans `workbook_generator/config.py` (ex. `PDFStyle.MARGIN_LEFT`, `PDFStyle.PAGE_WIDTH`).
 
 ## Bonnes pratiques
 
-- Lors de la modification de `generate_workbook_chap0_final.py` ou de tout autre script de génération, utilisez un nommage de variable clair pour le placement des éléments.
+- Lors de la modification d'un script de module (comme `workbook_generator/chapters/chapX.py`), utilisez le retour des fonctions de composants (qui renvoient généralement la nouvelle coordonnée Y `current_y`) pour chainer vos appels de dessin.
 - Si le script rencontre des `TypeError`, lisez les fichiers source de ReportLab (`site-packages/reportlab...`) pour confirmer les signatures de méthodes exactes, car il y a des variations entre les versions.
 
 ## Quand utiliser cette compétence
